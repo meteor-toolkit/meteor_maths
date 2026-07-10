@@ -304,7 +304,7 @@ class TestSampling(unittest.TestCase):
             y_source,
             x_target,
             y_target,
-            n_min_source=9,
+            # n_min_source=9,
             mask_invalid=True,
         )[0]
 

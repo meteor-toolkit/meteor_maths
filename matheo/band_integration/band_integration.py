@@ -23,8 +23,9 @@ __created__ = "30/7/2021"
 def cutout_nonzero(
     y: np.ndarray,
     x: np.ndarray,
-    buffer: Optional[Union[float, int]] = 0.2,
-    relative_threshold: Optional[Union[float, int]] = 0.0,
+    buffer: Optional[Union[float, int]] = 0.05,
+    relative_threshold: Optional[Union[float, int]] = 0.05,
+    **kwargs: Optional[dict]
 ) -> Tuple[np.ndarray, np.ndarray, List[int]]:
     """
     Returns continuous non-zero part of function y(x)
@@ -396,12 +397,12 @@ def band_int(
 
     x_r_off = get_x_offset(r, x_r, x_r_centre) if x_r_centre is not None else 0
 
-    if np.min(x_r + x_r_off) < np.min(x) or np.max(x_r + x_r_off) > np.max(x):
-        warnings.warn(
-            "The x_r coordinate range (%s-%s) exceeds the range of the x coordinate range (%s-%s), and the band integration can thus not be applied."
-            % (np.min(x_r), np.max(x_r), np.min(x), np.max(x))
-        )
-        return np.nan
+    # if np.min(x_r + x_r_off) < np.min(x) or np.max(x_r + x_r_off) > np.max(x):
+    #     warnings.warn(
+    #         "The x_r coordinate range (%s-%s) exceeds the range of the x coordinate range (%s-%s), and the band integration can thus not be applied."
+    #         % (np.min(x_r), np.max(x_r), np.min(x), np.max(x))
+    #     )
+    #     return np.nan
 
     d_band, u_d_band = func_with_unc(
         _band_int_arr,

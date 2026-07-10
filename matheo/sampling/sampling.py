@@ -125,6 +125,7 @@ def nearest_neighbour_resample(
     x_target: np.ndarray,
     y_target: np.ndarray,
     n_min_source: int = None,
+    percentile_threshold: float = 50.0,
     mask_invalid: bool = True,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
@@ -143,6 +144,18 @@ def nearest_neighbour_resample(
     grid_source = np.c_[x_source.ravel(), y_source.ravel()]
     grid_target = np.c_[x_target.ravel(), y_target.ravel()]
 
+    if ((x_source.shape[0] % x_target.shape[0]) > 0) and (
+        x_source.shape[0] % x_target.shape[0]
+    ) <= n_min_source / 2:
+        data = data[: -(x_source.shape[0] % x_target.shape[0]), :]
+        x_source = x_source[: -(x_source.shape[0] % x_target.shape[0]), :]
+        y_source = y_source[: -(x_source.shape[0] % x_target.shape[0]), :]
+    if ((x_source.shape[1] % x_target.shape[1]) > 0) and (
+        x_source.shape[1] % x_target.shape[1]
+    ) <= n_min_source / 2:
+        data = data[:, : -(x_source.shape[1] % x_target.shape[1])]
+        x_source = x_source[:, : -(x_source.shape[1] % x_target.shape[1])]
+        y_source = y_source[:, : -(x_source.shape[1] % x_target.shape[1])]
     # Create KDTree for target grid
     tree = spatial.cKDTree(grid_target)
 
@@ -155,19 +168,41 @@ def nearest_neighbour_resample(
 
     n_data_target = np.zeros(x_target.ravel().shape)
 
-    np.add.at(sum_target, idx, data.ravel())
     np.add.at(n_data_target, idx, 1)
+    np.add.at(sum_target, idx, data.ravel())
     np.add.at(std_target, idx, data.ravel() ** 2)
 
     # Calculate average target grid values
     data_target = sum_target / n_data_target
     std_target = (std_target / n_data_target - data_target**2.0) ** 0.5
 
+    # # Evaluate mask for invalid comparison sample values
+    # if mask_invalid is True:
+    #     data_target.reshape(x_target.shape)[
+    #         np.where(n_data_target.reshape(x_target.shape) != n_min_source)
+    #     ] = np.nan
+
+    # Dynamically estimate n_min_source if not provided
+    if n_min_source is None:
+        dx_source = np.mean(np.diff(np.unique(x_source)))
+        dy_source = np.mean(np.diff(np.unique(y_source)))
+        dx_target = np.mean(np.diff(np.unique(x_target)))
+        dy_target = np.mean(np.diff(np.unique(y_target)))
+        source_pixel_area = dx_source * dy_source
+        target_pixel_area = dx_target * dy_target
+        expected_n_source = target_pixel_area / source_pixel_area
+        n_min_source = int(np.floor(expected_n_source))
+
     # Evaluate mask for invalid comparison sample values
-    if mask_invalid is True:
-        data_target.reshape(x_target.shape)[
-            np.where(n_data_target.reshape(x_target.shape) != n_min_source)
-        ] = np.nan
+    if mask_invalid:
+        mask = n_data_target.reshape(x_target.shape) < n_min_source
+        data_target.reshape(x_target.shape)[mask] = np.nan
+        std_target.reshape(x_target.shape)[mask] = np.nan
+
+    # if mask_invalid:
+    #     threshold = np.percentile(n_data_target[n_data_target > 0], percentile_threshold)
+    #     mask = n_data_target.reshape(x_target.shape) < threshold
+    #     data_target.reshape(x_target.shape)[mask] = np.nan
 
     return data_target.reshape(x_target.shape), std_target.reshape(x_target.shape)
 
