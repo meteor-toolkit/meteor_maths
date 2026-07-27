@@ -814,6 +814,44 @@ class TestBandIntegrate(unittest.TestCase):
             )
             self.assertEqual(real_call[0][4], expected_call[1][4])
 
+    def test_spectral_band_int_sensor_nomock(
+        self,
+    ):
+        d = np.zeros((3, 4, 16))
+        wl = np.arange(400, 560, 10)
+
+        d_band, wl_band = bi.spectral_band_int_sensor(
+            d,
+            wl,
+            d_axis_wl=2,
+            platform_name="Sentinel-2A",
+            sensor_name="msi",
+        )
+
+        self.assertEqual(d_band.shape, (3, 4, 2))
+        np.testing.assert_array_equal(d_band, np.zeros(d_band.shape))
+
+        expected_wl_band = np.array([442.69, 492.7])
+
+        np.testing.assert_array_almost_equal(wl_band, expected_wl_band, decimal=1)
+
+        d = np.zeros(16)
+        wl = np.arange(400, 560, 10)
+
+        d_band, wl_band = bi.spectral_band_int_sensor(
+            d,
+            wl,
+            platform_name="Sentinel-2A",
+            sensor_name="msi",
+        )
+
+        self.assertEqual(d_band.shape, (2,))
+        np.testing.assert_array_equal(d_band, np.zeros(d_band.shape))
+
+        expected_wl_band = np.array([442.69, 492.7])
+
+        np.testing.assert_array_almost_equal(wl_band, expected_wl_band, decimal=1)
+
     @patch("matheo.band_integration.band_integration.return_r_pixel")
     @patch("matheo.band_integration.band_integration.band_int")
     def test_pixel_int(self, mock_bi, mock_rrp):

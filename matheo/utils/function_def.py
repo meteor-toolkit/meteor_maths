@@ -86,7 +86,7 @@ def f_normalised(f: Callable, x: np.ndarray, *args, high_res_sampling: float = 0
     x_highres = np.arange(min(x), max(x), high_res_sampling)
     y_highres = f(x_highres, *args)
 
-    y /= np.trapz(y_highres, x_highres)
+    y /= np.trapezoid(y_highres, x_highres)
 
     return y
 

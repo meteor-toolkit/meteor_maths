@@ -108,9 +108,9 @@ def _band_int(
         d_interp = interpolate_1d(x, d, x_r)
 
         if rint_norm:
-            norm_val = np.trapz(r, x_r)
+            norm_val = np.trapezoid(r, x_r)
 
-        return np.trapz(r * d_interp, x_r) / norm_val
+        return np.trapezoid(r * d_interp, x_r) / norm_val
 
     # If spectrum lower res than the SRF - interpolate spectrum onto SRF wavelength coordinates before integration
     else:
@@ -122,9 +122,9 @@ def _band_int(
         r_interp = interpolate_1d(x_r, r, x)
 
         if rint_norm:
-            norm_val = np.trapz(r_interp, x)
+            norm_val = np.trapezoid(r_interp, x)
 
-        return np.trapz(d * r_interp, x) / norm_val
+        return np.trapezoid(d * r_interp, x) / norm_val
 
 
 def _band_int_regular_grid(
@@ -417,6 +417,12 @@ def band_int(
         ),
         u_params=dict(d=u_d, x=u_x, r=u_r, x_r=u_x_r),
     )
+
+    if hasattr(d_band, "size") and d_band.size == 1:
+        d_band = d_band.item()
+
+    if hasattr(u_d_band, "size") and u_d_band.size == 1:
+        u_d_band = u_d_band.item()
 
     if u_d_band is None:
         return d_band
