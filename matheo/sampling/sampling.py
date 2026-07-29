@@ -7,7 +7,6 @@ import numpy as np
 import xarray as xr
 from scipy import spatial
 
-
 __author__ = ["Maddie Stedman"]
 __all__ = [
     "nearest_neighbour_resample",
@@ -100,7 +99,9 @@ def _estimate_n_min_source(
     return int(_expected_source_count(dx_target, dy_target, dx_source, dy_source))
 
 
-def _local_axis_geometry(x: np.ndarray, y: np.ndarray, axis: int, direction: bool = True):
+def _local_axis_geometry(
+    x: np.ndarray, y: np.ndarray, axis: int, direction: bool = True
+):
     """Per-pixel local grid spacing (and, unless ``direction=False``, unit
     direction vector) along one array axis of a structured 2D grid (as from
     ``numpy.meshgrid``), estimated from the distance to a pixel's two

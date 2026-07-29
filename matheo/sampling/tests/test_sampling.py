@@ -16,7 +16,6 @@ from matheo.sampling import (
     RegridCache,
 )
 
-
 __author__ = "Maddie Stedman"
 
 
@@ -674,9 +673,7 @@ class TestRegridCache(unittest.TestCase):
         # removing a specific pixel on the bin average is easy to compute
         data_source = x_source.copy()
 
-        x_target, y_target = np.meshgrid(
-            np.arange(1, 19, 2.0), np.arange(1, 9, 2.0)
-        )
+        x_target, y_target = np.meshgrid(np.arange(1, 19, 2.0), np.arange(1, 9, 2.0))
         cache = RegridCache(x_source, y_source, x_target, y_target)
 
         removed = np.zeros_like(x_source, dtype=bool)
@@ -709,9 +706,7 @@ class TestRegridCache(unittest.TestCase):
         data_source = rng.random(x_source.shape)
         data_source[rng.random(x_source.shape) < 0.3] = np.nan
 
-        x_target, y_target = np.meshgrid(
-            np.arange(1, 29, 3.0), np.arange(1, 29, 3.0)
-        )
+        x_target, y_target = np.meshgrid(np.arange(1, 29, 3.0), np.arange(1, 29, 3.0))
         cache = RegridCache(x_source, y_source, x_target, y_target)
         data_target, mask = cache.regrid(data_source)
 
@@ -882,9 +877,7 @@ class TestRegridCache(unittest.TestCase):
         x_source, y_source = np.meshgrid(np.arange(30), np.arange(30))
         data_source = rng.random(x_source.shape)
         data_source[rng.random(x_source.shape) < 0.3] = np.nan
-        x_target, y_target = np.meshgrid(
-            np.arange(1, 29, 3.0), np.arange(1, 29, 3.0)
-        )
+        x_target, y_target = np.meshgrid(np.arange(1, 29, 3.0), np.arange(1, 29, 3.0))
 
         cache_base = RegridCache(x_source, y_source, x_target, y_target)
         data_base, mask_base = cache_base.regrid(data_source)
@@ -971,9 +964,7 @@ class TestRegridCache(unittest.TestCase):
         x_source, y_source = np.meshgrid(np.arange(30), np.arange(30))
         data_source = rng.random(x_source.shape)
         data_source[rng.random(x_source.shape) < 0.2] = np.nan
-        x_target, y_target = np.meshgrid(
-            np.arange(1, 29, 3.0), np.arange(1, 29, 3.0)
-        )
+        x_target, y_target = np.meshgrid(np.arange(1, 29, 3.0), np.arange(1, 29, 3.0))
 
         self._assert_independently_rotated_swaths_are_frame_invariant(
             x_source,
@@ -1000,9 +991,7 @@ class TestRegridCache(unittest.TestCase):
         x_source, y_source = np.meshgrid(np.arange(0, 18, 3), np.arange(0, 18, 3))
         data_source = rng.random(x_source.shape)
         data_source[rng.random(x_source.shape) < 0.3] = np.nan
-        x_target, y_target = np.meshgrid(
-            np.arange(0, 17, 1.0), np.arange(0, 17, 1.0)
-        )
+        x_target, y_target = np.meshgrid(np.arange(0, 17, 1.0), np.arange(0, 17, 1.0))
 
         mask_ref = self._assert_independently_rotated_swaths_are_frame_invariant(
             x_source,
@@ -1062,9 +1051,7 @@ class TestRegridCache(unittest.TestCase):
         # be validity that doesn't track the actual geometric misalignment
         degrees_sorted = sorted(valid_fractions)
         fractions_in_order = [valid_fractions[d] for d in degrees_sorted]
-        self.assertEqual(
-            fractions_in_order, sorted(fractions_in_order, reverse=True)
-        )
+        self.assertEqual(fractions_in_order, sorted(fractions_in_order, reverse=True))
 
     def test_regrid_with_cache_locally_varying_source_density(self):
         """The source grid is twice as dense in its left half as its right
@@ -1085,9 +1072,7 @@ class TestRegridCache(unittest.TestCase):
         x_source, y_source = np.meshgrid(x_row, y_col)
         data_source = np.ones_like(x_source)
 
-        x_target, y_target = np.meshgrid(
-            np.arange(1, 19, 2.0), np.arange(1, 9, 2.0)
-        )
+        x_target, y_target = np.meshgrid(np.arange(1, 19, 2.0), np.arange(1, 9, 2.0))
         cache = RegridCache(x_source, y_source, x_target, y_target)
         data_target, mask = cache.regrid(data_source)
 
@@ -1096,9 +1081,7 @@ class TestRegridCache(unittest.TestCase):
         self.assertGreater(dense_half.mean(), 0.5)
         self.assertGreater(sparse_half.mean(), 0.5)
         # every valid target pixel overlaps real, uniform-valued source data
-        np.testing.assert_array_almost_equal(
-            data_target[mask], np.ones(np.sum(mask))
-        )
+        np.testing.assert_array_almost_equal(data_target[mask], np.ones(np.sum(mask)))
 
         # the cheap regular_grid=True path uses one grid-wide density and so
         # is calibrated to whichever half dominates the grid-wide estimate -
@@ -1230,9 +1213,7 @@ class TestRegridCache(unittest.TestCase):
         y_col[10] = y_col[9]  # rows 9 and 10 now coincide
         x_source, y_source = np.meshgrid(x_row, y_col)
         data_source = np.ones_like(x_source)
-        x_target, y_target = np.meshgrid(
-            np.arange(1, 19, 3.0), np.arange(1, 19, 3.0)
-        )
+        x_target, y_target = np.meshgrid(np.arange(1, 19, 3.0), np.arange(1, 19, 3.0))
 
         cache = RegridCache(x_source, y_source, x_target, y_target)
         self.assertTrue(np.all(np.asarray(cache.n_min_source) < 1000))
