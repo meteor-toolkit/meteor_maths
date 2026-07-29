@@ -242,6 +242,23 @@ class TestSampling(unittest.TestCase):
                 method="bilinear",
             )
 
+    def test_resample_unknown_method_raises_even_when_grids_match(self):
+        """Regression test: method validation must happen even when the
+        'source and target grid are identical, skip resampling' shortcut
+        would otherwise return early - an invalid/misspelled method name
+        must never be silently accepted just because it happened not to be
+        needed for this particular call."""
+        with self.assertRaises(NotImplementedError):
+            resample(
+                "data_2d_source",
+                self.test_ds,
+                x_source=self.test_ds.coord1_source.values,
+                y_source=self.test_ds.coord2_source.values,
+                x_target=self.test_ds.coord1_source.values,
+                y_target=self.test_ds.coord2_source.values,
+                method="bilinear",
+            )
+
     def test_resample_dispatches_new_methods_via_registry(self):
         """The whole point of the registry: registering a new resampling
         backend (any class satisfying the Resampler protocol, i.e. having a
@@ -1115,6 +1132,114 @@ class TestRegridCache(unittest.TestCase):
 
         np.testing.assert_array_almost_equal(data_local, data_regular)
         np.testing.assert_array_equal(mask_local, mask_regular)
+
+    def test_regrid_with_cache_degenerate_source_grid(self):
+        """Regression test: a source grid with only one distinct coordinate
+        along an axis (e.g. a single-column north-south transect) used to
+        either silently discard all data (regular_grid=False: local spacing
+        along the degenerate axis was treated as exactly zero, which floored
+        the local source pixel area to ~0 and made the expected-count ratio
+        explode to billions, so n_min_source could never be met - see
+        test_regrid_with_cache_locally_varying_source_density's sibling bug
+        report) or crash outright (regular_grid=True: _grid_spacing's
+        np.median(np.diff(np.unique(...))) is NaN for a single-valued axis,
+        and np.floor(nan) raises ValueError when cast to int). Both modes
+        should instead treat the degenerate axis as carrying no density
+        information, and still resample the one target column that
+        genuinely overlaps the source transect."""
+        rng = np.random.default_rng(0)
+        x_source, y_source = np.meshgrid(np.array([5.0]), np.arange(10))
+        data_source = rng.random(x_source.shape)
+        x_target, y_target = np.meshgrid(
+            np.array([4.0, 5.0, 6.0]), np.arange(0, 10, 2.0)
+        )
+
+        for regular_grid in [False, True]:
+            with self.subTest(regular_grid=regular_grid):
+                cache = RegridCache(
+                    x_source, y_source, x_target, y_target, regular_grid=regular_grid
+                )
+                # a sane (small, finite) threshold - not the ~2e12 the
+                # unfixed regular_grid=False estimator produced here
+                self.assertTrue(np.all(np.asarray(cache.n_min_source) <= 10))
+
+                data_target, mask = cache.regrid(data_source)
+                # only the middle target column (x=5) actually overlaps the
+                # source transect (also at x=5) - the outer columns (x=4,
+                # x=6) genuinely have no nearby source data and should stay
+                # masked invalid, but the middle one must now be valid
+                self.assertTrue(np.all(mask[:, 1]))
+                self.assertFalse(np.any(mask[:, [0, 2]]))
+                self.assertFalse(np.any(np.isnan(data_target[:, 1])))
+
+    def test_regrid_with_cache_degenerate_target_grid(self):
+        """Companion to the degenerate-source test above: a target grid with
+        only one distinct coordinate along an axis (e.g. resampling onto a
+        transect) must also not crash or spuriously discard data, for both
+        regular_grid modes."""
+        rng = np.random.default_rng(1)
+        x_source, y_source = np.meshgrid(np.arange(0, 10, 1.0), np.arange(0, 10, 1.0))
+        data_source = rng.random(x_source.shape)
+        x_target, y_target = np.meshgrid(np.array([5.0]), np.arange(0, 10, 2.0))
+
+        for regular_grid in [False, True]:
+            with self.subTest(regular_grid=regular_grid):
+                cache = RegridCache(
+                    x_source, y_source, x_target, y_target, regular_grid=regular_grid
+                )
+                data_target, mask = cache.regrid(data_source)
+                self.assertTrue(np.all(mask))
+                self.assertFalse(np.any(np.isnan(data_target)))
+
+    def test_regrid_with_cache_both_grids_degenerate_on_same_axis(self):
+        """Edge case: source and target both single-column (e.g. two
+        transects being compared) - neither grid has any information about
+        spacing along that axis, so it should be treated as fully neutral
+        rather than raising or dividing by zero."""
+        x_source, y_source = np.meshgrid(np.array([5.0]), np.arange(10))
+        data_source = np.random.default_rng(2).random(x_source.shape)
+        x_target, y_target = np.meshgrid(np.array([5.0]), np.arange(0, 10, 2.0))
+
+        for regular_grid in [False, True]:
+            with self.subTest(regular_grid=regular_grid):
+                cache = RegridCache(
+                    x_source, y_source, x_target, y_target, regular_grid=regular_grid
+                )
+                data_target, mask = cache.regrid(data_source)
+                self.assertTrue(np.all(mask))
+                self.assertFalse(np.any(np.isnan(data_target)))
+
+    def test_regrid_with_cache_duplicated_source_row_does_not_corrupt_threshold(self):
+        """Regression test: two array-adjacent source points that merely
+        happen to coincide (e.g. a duplicated scanline in real satellite
+        geolocation data) is not the same as a *fully* degenerate axis - the
+        rest of the axis has perfectly normal spacing - but it used to slip
+        past the degenerate-axis guard: _local_axis_geometry returned an
+        exact 0.0 local spacing for the duplicated pixel, which
+        _expected_source_count then divided by, producing inf (or, if both
+        sides of the ratio were affected, nan). Casting that to int is
+        undefined in numpy: it silently wrapped to either 9223372036854775807
+        (permanently invalid, no count could ever satisfy it) or 0
+        (permanently "valid" regardless of data quality) - with only a
+        suppressed RuntimeWarning, no visible error. Both directions should
+        now be impossible: n_min_source must stay a small, sane integer
+        everywhere, and a target region with genuinely uniform, complete
+        coverage must resample cleanly despite the nearby duplicate."""
+        x_row = np.arange(20).astype(float)
+        y_col = np.arange(20).astype(float)
+        y_col[10] = y_col[9]  # rows 9 and 10 now coincide
+        x_source, y_source = np.meshgrid(x_row, y_col)
+        data_source = np.ones_like(x_source)
+        x_target, y_target = np.meshgrid(
+            np.arange(1, 19, 3.0), np.arange(1, 19, 3.0)
+        )
+
+        cache = RegridCache(x_source, y_source, x_target, y_target)
+        self.assertTrue(np.all(np.asarray(cache.n_min_source) < 1000))
+
+        data_target, mask = cache.regrid(data_source)
+        self.assertTrue(np.all(mask))
+        np.testing.assert_array_almost_equal(data_target, np.ones_like(data_target))
 
 
 if __name__ == "__main__":

@@ -55,6 +55,10 @@ def _grid_spacing(
 #: disagree on which pixels are valid.
 _FLOOR_EPSILON = 1e-9
 
+#: Below this, two array-adjacent grid points are treated as coincident
+#: (see _local_axis_geometry) rather than as a genuine, very small spacing.
+_DEGENERATE_SPACING_TOLERANCE = 1e-9
+
 
 def _expected_source_count(dx_target, dy_target, dx_source, dy_source):
     """Expected number of source pixels within a target pixel's footprint,
@@ -115,6 +119,18 @@ def _local_axis_geometry(x: np.ndarray, y: np.ndarray, axis: int, direction: boo
     strict, or an expected-count ratio explode - see
     :func:`_expected_source_count`).
 
+    The same applies, pixel by pixel, if two array-adjacent points merely
+    happen to coincide (e.g. a duplicated scanline in real satellite
+    geolocation data) even though the axis as a whole isn't degenerate: a
+    literal zero spacing there isn't a meaningful "very high density"
+    measurement, just a local data artifact, so it's promoted to infinite
+    too rather than left at zero. Left as zero, it would either make that
+    one pixel's footprint impossibly strict, or - since the underlying
+    coordinate arrays are typically float64 while dividing a real number by
+    it in :func:`_expected_source_count` produces ``inf``/``nan`` - silently
+    corrupt the final ``int`` cast there (numpy wraps ``inf``/``nan`` cast to
+    ``int`` to an arbitrary sentinel rather than raising).
+
     Returns the local spacing magnitude, and - unless ``direction=False``,
     which skips this (more expensive) part when only the magnitude is
     needed - the (x, y) unit vector pointing along this axis at each pixel.
@@ -146,6 +162,7 @@ def _local_axis_geometry(x: np.ndarray, y: np.ndarray, axis: int, direction: boo
     mag_before, mag_after = pad_before_after(mag)
     use_before = mag_before <= mag_after
     spacing = np.where(use_before, mag_before, mag_after)
+    spacing = np.where(spacing <= _DEGENERATE_SPACING_TOLERANCE, np.inf, spacing)
     if not direction:
         return spacing
 
@@ -178,15 +195,14 @@ def _aggregate_valid(
         work for callers - like RegridCache.regrid - that don't use it.
     """
     valid = ~np.isnan(data_in_range)
-    sum_target = np.zeros(n_target)
-    n_valid_target = np.zeros(n_target)
-    np.add.at(sum_target, idx[valid], data_in_range[valid])
-    np.add.at(n_valid_target, idx[valid], 1)
+    valid_idx = idx[valid]
+    valid_data = data_in_range[valid]
+    sum_target = np.bincount(valid_idx, weights=valid_data, minlength=n_target)
+    n_valid_target = np.bincount(valid_idx, minlength=n_target).astype(float)
 
     sumsq_target = None
     if include_sumsq:
-        sumsq_target = np.zeros(n_target)
-        np.add.at(sumsq_target, idx[valid], data_in_range[valid] ** 2)
+        sumsq_target = np.bincount(valid_idx, weights=valid_data**2, minlength=n_target)
 
     return sum_target, sumsq_target, n_valid_target
 
@@ -540,7 +556,7 @@ def resample(
 
     # if source and target grid are the same, no resampling is necessary
     if x_source.shape == x_target.shape:
-        if np.all(x_source == x_target) & np.all(y_source == y_target):
+        if np.all(x_source == x_target) and np.all(y_source == y_target):
             return ds[var].values
 
     if resampler is None:
@@ -569,15 +585,19 @@ def resample(
         result = resampler.regrid(data_2d, mask_invalid=mask_invalid)[0]
         return result.T if transpose_xy else result
 
+    values = ds[var].values
     if data_intxy.ndim == 2:
-        data_intxy = _regrid_2d(ds[var].values)
+        data_intxy = _regrid_2d(values)
     elif data_intxy.ndim == 3:
-        for i in range(len(ds[ds[var].dims[0]].values)):
-            data_intxy[i] = _regrid_2d(ds[var].values[i])
+        n_leading = len(ds[ds[var].dims[0]].values)
+        for i in range(n_leading):
+            data_intxy[i] = _regrid_2d(values[i])
     elif data_intxy.ndim == 4:
-        for i in range(len(ds[ds[var].dims[0]].values)):
-            for j in range(len(ds[ds[var].dims[1]].values)):
-                data_intxy[i, j] = _regrid_2d(ds[var].values[i, j])
+        n_leading0 = len(ds[ds[var].dims[0]].values)
+        n_leading1 = len(ds[ds[var].dims[1]].values)
+        for i in range(n_leading0):
+            for j in range(n_leading1):
+                data_intxy[i, j] = _regrid_2d(values[i, j])
     else:
         raise NotImplementedError(
             f"Resampling not implemented for {data_intxy.ndim} dims. Data must have 2, 3 or 4 dims."

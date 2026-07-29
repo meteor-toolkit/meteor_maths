@@ -88,6 +88,43 @@ When any of these optional keyword are set, uncertainties are propagated using a
 There are also a number of additional functions (such as higher dimension version of the above, e.g. the band_int2ax() function) and other optional keywords.
 For explanations on these we refer to the matheo API.
 
+Resampling
+###################
+Matheo also provides tools for resampling gridded data from one 2D grid onto another, e.g. when pairing up two Earth observation products defined on different grids.
+
+The simplest way to do this is with the nearest_neighbour_resample() function, which averages the source pixels nearest to each target pixel::
+
+   import numpy as np
+   from matheo.sampling import nearest_neighbour_resample
+
+   x_source, y_source = np.meshgrid(np.arange(20), np.arange(20))
+   data_source = np.random.random(x_source.shape)
+   x_target, y_target = np.meshgrid(np.arange(1, 19, 2.0), np.arange(1, 19, 2.0))
+
+   data_target, std_target = nearest_neighbour_resample(
+      data_source, x_source, y_source, x_target, y_target
+   )
+
+Target pixels for which too few source pixels were available (estimated automatically from the relative density of the two grids) are set to nan by default - pass ``mask_invalid=False`` to disable this.
+
+For xarray Datasets with 2, 3 or 4 dimensional variables, use the resample() function instead, which resamples a variable's x/y dimensions while looping over any other (e.g. band or time) dimensions::
+
+   import xarray as xr
+   from matheo.sampling import resample
+
+   ds = xr.Dataset(data_vars=dict(var=(["y_source", "x_source"], data_source)))
+   data_target = resample("var", ds, x_source, y_source, x_target, y_target)
+
+When resampling several variables that share the same source/target grids (e.g. in a loop), build a RegridCache once and reuse it, to avoid recomputing the underlying KDTree on every call::
+
+   from matheo.sampling import RegridCache
+
+   cache = RegridCache(x_source, y_source, x_target, y_target)
+   for var in ["var_a", "var_b"]:
+      data_target = resample(
+         var, ds, x_source, y_source, x_target, y_target, resampler=cache
+      )
+
 Utilities
 ############
 

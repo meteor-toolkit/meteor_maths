@@ -13,4 +13,5 @@ Submodules
    :maxdepth: 4
 
    matheo.band_integration
+   matheo.sampling
    matheo.utils
