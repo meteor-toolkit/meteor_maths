@@ -7,6 +7,7 @@ from collections.abc import Callable, Iterable
 
 import numpy as np
 from punpy import MCPropagation
+from typing import Optional
 
 __author__ = "Sam Hunt"
 __created__ = "24/7/2020"
@@ -27,7 +28,7 @@ def _max_dim(arrays: Iterable[np.ndarray]) -> int:
     return max(dims)
 
 
-def _unc_to_dim(unc: float | np.ndarray, dim: int, x: np.ndarray = None, x_len: int | None = None) -> np.ndarray:
+def _unc_to_dim(unc: float | np.ndarray, dim: int, x: Optional[np.ndarray] = None, x_len: int | None = None) -> float | np.ndarray | None:
     """
     Scales up uncertainty to given dimension (e.g. float to full vector, vector to diagonal maxtrix)
 

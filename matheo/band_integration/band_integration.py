@@ -15,6 +15,7 @@ from matheo.band_integration.srf_utils import (
 )
 from matheo.utils.function_def import f_gaussian, f_tophat, f_triangle, iter_f
 from matheo.utils.punpy_util import func_with_unc
+from typing import Optional
 
 __author__ = "Sam Hunt"
 __created__ = "30/7/2021"
@@ -60,7 +61,7 @@ def cutout_nonzero(
     return y[imin:imax], x[imin:imax], [imin, imax]
 
 
-def get_x_offset(y, x, x_centre):
+def get_x_offset(y: np.ndarray, x: np.ndarray, x_centre: float) -> float:
     """
     Returns coordinate offset required to centre function on given position.
 
@@ -667,8 +668,8 @@ def spectral_band_int_sensor(
     detector_name: str | None = None,
     band_names: None | list[str] = None,
     d_axis_wl: int = 0,
-    u_d: np.ndarray = None,
-    u_wl: np.ndarray = None,
+    u_d: Optional[np.ndarray] = None,
+    u_wl: Optional[np.ndarray] = None,
     **kwargs: dict | None,
 ) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
