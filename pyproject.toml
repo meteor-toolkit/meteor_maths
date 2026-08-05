@@ -14,11 +14,8 @@ dependencies = [
   "pyproj",
   "comet_maths",
 ]
-authors = [
-  { name = "Sam Hunt", email = "sam.hunt@npl.co.uk" },
-  { name = "Pieter De Vis" },
-]
-license = { text = "None" }
+authors = [{name = "MetEOR Toolkit Team", email = "team@comet-toolkit.org"}]
+license-files = ["LICENSE"]
 urls = { "Homepage" = "https://github.com/meteor-toolkit/matheo" }
 
 
