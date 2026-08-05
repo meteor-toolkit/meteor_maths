@@ -299,7 +299,7 @@ class TestBandIntegrate(unittest.TestCase):
         x_test = np.arange(43, 57, 0.1)
         y_test = fd.f_tophat(x_test, 50, 10)
 
-        y_eval, x_eval, idx = bi.cutout_nonzero(y, x, buffer=0.2)
+        y_eval, x_eval, _idx = bi.cutout_nonzero(y, x, buffer=0.2)
 
         np.testing.assert_array_almost_equal(x_test, x_eval)
         np.testing.assert_array_almost_equal(y_test, y_eval)
@@ -311,7 +311,7 @@ class TestBandIntegrate(unittest.TestCase):
         x_test = np.arange(45, 55, 0.1)
         y_test = np.ones(x_test.shape)
 
-        y_eval, x_eval, idx = bi.cutout_nonzero(y, x, buffer=0.0)
+        y_eval, x_eval, _idx = bi.cutout_nonzero(y, x, buffer=0.0)
 
         np.testing.assert_array_almost_equal(x_test, x_eval)
         np.testing.assert_array_almost_equal(y_test, y_eval)
@@ -419,7 +419,7 @@ class TestBandIntegrate(unittest.TestCase):
     def test__band_int_arr_regular_grid(self, mock):
         x = np.arange(4)
         x_r = np.arange(4)
-        d_band = bi._band_int_arr("d", x, "r", x_r, d_axis_x=2)
+        bi._band_int_arr("d", x, "r", x_r, d_axis_x=2)
 
         mock.assert_called_once_with("d", x, "r", d_axis_x=2)
 
@@ -632,7 +632,7 @@ class TestBandIntegrate(unittest.TestCase):
         d = np.zeros((3, 4, 11))
         wl = np.arange(400, 510, 10)
 
-        d_band, wl_band = bi.spectral_band_int_sensor(
+        d_band, _wl_band = bi.spectral_band_int_sensor(
             d,
             wl,
             d_axis_wl=2,
@@ -851,7 +851,20 @@ class TestBandIntegrate(unittest.TestCase):
         width_pixel = np.array([2, 4])
         d_axis_x = 0
 
-        d_band = bi.pixel_int(d=d, x=x, x_pixel=x_pixel, width_pixel=width_pixel, d_axis_x=d_axis_x)
+        bi.pixel_int(d=d, x=x, x_pixel=x_pixel, width_pixel=width_pixel, d_axis_x=d_axis_x)
+
+        mock_bi.assert_called_once_with(d=d, x=x, r=mock_rrp.return_value, x_r=x, d_axis_x=d_axis_x)
+
+    @patch("matheo.band_integration.band_integration.return_r_pixel")
+    @patch("matheo.band_integration.band_integration.band_int")
+    def test_pixel_int_r_sampling_called(self, mock_bi, mock_rrp):
+        d = np.zeros(12)
+        x = np.arange(12)
+        x_pixel = np.array([5, 10])
+        width_pixel = np.array([2, 4])
+        d_axis_x = 0
+
+        bi.pixel_int(d=d, x=x, x_pixel=x_pixel, width_pixel=width_pixel, d_axis_x=d_axis_x)
 
         mock_bi.assert_called_once_with(d=d, x=x, r=mock_rrp.return_value, x_r=x, d_axis_x=d_axis_x)
 
@@ -864,20 +877,7 @@ class TestBandIntegrate(unittest.TestCase):
         width_pixel = np.array([2, 4])
         d_axis_x = 0
 
-        d_band = bi.pixel_int(d=d, x=x, x_pixel=x_pixel, width_pixel=width_pixel, d_axis_x=d_axis_x)
-
-        mock_bi.assert_called_once_with(d=d, x=x, r=mock_rrp.return_value, x_r=x, d_axis_x=d_axis_x)
-
-    @patch("matheo.band_integration.band_integration.return_r_pixel")
-    @patch("matheo.band_integration.band_integration.band_int")
-    def test_pixel_int_r_sampling(self, mock_bi, mock_rrp):
-        d = np.zeros(12)
-        x = np.arange(12)
-        x_pixel = np.array([5, 10])
-        width_pixel = np.array([2, 4])
-        d_axis_x = 0
-
-        d_band = bi.pixel_int(
+        bi.pixel_int(
             d=d,
             x=x,
             x_pixel=x_pixel,
