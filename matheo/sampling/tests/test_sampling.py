@@ -346,12 +346,12 @@ class TestSampling(unittest.TestCase):
         # deliberately transposed to (15, 18), to match dims=[x_source, y_source]
         data_2d = base.T
         ds = xr.Dataset(
-            data_vars=dict(
-                var3d=(
+            data_vars={
+                "var3d": (
                     ["bands", "x_source", "y_source"],
                     np.stack([data_2d, data_2d * 2]),
                 ),
-            )
+            }
         )
 
         result = resample("var3d", ds, x_source, y_source, x_target, y_target)
