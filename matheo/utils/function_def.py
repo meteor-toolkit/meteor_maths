@@ -212,7 +212,6 @@ class RepeatingFuncUtil:
         # Evaluate function
         ys = np.zeros((len(self.centres), len(x)))
         for i_band, (centre, width) in enumerate(zip(self.centres, self.widths)):
-
             if self.normalise:
                 ys[i_band, :] = f_normalised(self.f, x, centre, width)
             else:
@@ -236,7 +235,6 @@ class RepeatingFuncUtil:
 
         # Iterate through bands
         if self.i < len(self.centres):
-
             centre = self.centres[self.i]
             width = self.widths[self.i]
 
