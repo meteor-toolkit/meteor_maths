@@ -1,0 +1,82 @@
+name: Tests
+
+on:
+  push:
+  
+  pull_request:
+
+jobs:
+  test:
+    name: "Python ${{ matrix.python-version }}"
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.13"]
+        include:
+          # Full matrix on manually-triggered runs and tags only
+          - python-version: "3.10"
+            if-tag-or-manual: true
+          - python-version: "3.11"
+            if-tag-or-manual: true
+          - python-version: "3.12"
+            if-tag-or-manual: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Configure NPL package registry
+        run: |
+          echo -e "machine gitlab.npl.co.uk\nlogin gitlab-ci-token\npassword ${{ secrets.NPL_GITLAB_TOKEN }}" >> ~/.netrc
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Run tests
+        run: |
+          mkdir -p test_report
+          pytest \
+            --html=test_report/report.html \
+            --cov-report html:test_report/cov_report \
+            --cov-report xml:test_report/coverage.xml \
+            --junitxml=test_report/junit.xml \
+            --cov=matheo
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-py${{ matrix.python-version }}
+          path: test_report/
+          retention-days: 7
+
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.13'
+        uses: codecov/codecov-action@v4
+        with:
+          files: test_report/coverage.xml
+          fail_ci_if_error: false
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - name: ruff format
+        run: ruff format --check matheo
+      - name: ruff lint
+        run: ruff check matheo
+      - name: mypy
+        run: mypy matheo

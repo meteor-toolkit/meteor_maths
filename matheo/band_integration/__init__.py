@@ -1,9 +1,9 @@
 from matheo.band_integration.band_integration import (
-    band_int,
-    band_int2ax,
-    band_int3ax,
-    spectral_band_int_sensor,
-    pixel_int,
-    band_int2d,
-    pixel_int2d,
+    band_int,  # noqa: F401
+    band_int2ax,  # noqa: F401
+    band_int2d,  # noqa: F401
+    band_int3ax,  # noqa: F401
+    pixel_int,  # noqa: F401
+    pixel_int2d,  # noqa: F401
+    spectral_band_int_sensor,  # noqa: F401
 )

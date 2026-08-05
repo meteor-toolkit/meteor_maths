@@ -2,10 +2,10 @@
 Functions to read spectral response function data with pyspectral
 """
 
+from collections.abc import Iterator
+
 import numpy as np
 from pyspectral.rsr_reader import RelativeSpectralResponse
-from typing import Union, List, Tuple, Iterator, Optional
-
 
 """___Authorship___"""
 __author__ = "Sam Hunt"
@@ -15,10 +15,10 @@ __created__ = "5/11/2020"
 def return_band_names(
     platform_name: str,
     sensor_name: str,
-    band_names: Optional[List[str]] = None,
-    min_wl: Optional[float] = None,
-    max_wl: Optional[float] = None,
-) -> List[str]:
+    band_names: list[str] | None = None,
+    min_wl: float | None = None,
+    max_wl: float | None = None,
+) -> list[str]:
     """
     Returns band names for specified sensor from `pyspectral <https://pyspectral.readthedocs.io/en/master/installation.html#static-data>`_ library.
 
@@ -32,18 +32,16 @@ def return_band_names(
     """
 
     srf_util = SensorSRFUtil(platform_name, sensor_name)
-    return srf_util.return_band_names(
-        band_names=band_names, min_wl=min_wl, max_wl=max_wl
-    )
+    return srf_util.return_band_names(band_names=band_names, min_wl=min_wl, max_wl=max_wl)
 
 
 def return_band_centres(
     platform_name: str,
     sensor_name: str,
-    band_names: Optional[List[str]] = None,
-    detector_name: Optional[str] = None,
-    min_wl: Optional[float] = None,
-    max_wl: Optional[float] = None,
+    band_names: list[str] | None = None,
+    detector_name: str | None = None,
+    min_wl: float | None = None,
+    max_wl: float | None = None,
 ) -> np.ndarray:
     """
     Returns band centres for specified sensor from `pyspectral <https://pyspectral.readthedocs.io/en/master/installation.html#static-data>`_ library.
@@ -59,18 +57,16 @@ def return_band_centres(
     :return: band centres in nm
     """
 
-    srf_util = SensorSRFUtil(
-        platform_name, sensor_name, detector_name, band_names=band_names
-    )
+    srf_util = SensorSRFUtil(platform_name, sensor_name, detector_name, band_names=band_names)
     return srf_util.return_band_centres(min_wl=min_wl, max_wl=max_wl)
 
 
 def return_srf(
     platform_name: str,
     sensor_name: str,
-    band_name: str = None,
-    detector_name: Union[None, str] = None,
-) -> Tuple[np.ndarray, np.ndarray]:
+    band_name: str | None = None,
+    detector_name: None | str = None,
+) -> tuple[np.ndarray, np.ndarray]:
     """
 
     Returns srf data for named band of for specified sensor from `pyspectral <https://pyspectral.readthedocs.io/en/master/installation.html#static-data>`_ library.
@@ -92,8 +88,8 @@ def return_srf(
 def return_iter_srf(
     platform_name: str,
     sensor_name: str,
-    band_names: Optional[List[str]] = None,
-    detector_name: Optional[str] = None,
+    band_names: list[str] | None = None,
+    detector_name: str | None = None,
 ) -> Iterator:
     """
     Returns iterable of band srfs for specified sensor from `pyspectral <https://pyspectral.readthedocs.io/en/master/installation.html#static-data>`_ library.
@@ -107,9 +103,7 @@ def return_iter_srf(
     :return: iterable that returns band srf and srf wavelength coordinates at each iteration
     """
 
-    srf_util = SensorSRFUtil(
-        platform_name, sensor_name, detector_name, band_names=band_names
-    )
+    srf_util = SensorSRFUtil(platform_name, sensor_name, detector_name, band_names=band_names)
     return iter(srf_util)
 
 
@@ -131,8 +125,8 @@ class SensorSRFUtil:
         self,
         platform_name,
         sensor_name,
-        detector_name: Union[None, str] = "det-1",
-        band_names: Union[None, List[str]] = None,
+        detector_name: None | str = "det-1",
+        band_names: None | list[str] = None,
     ):
 
         # Set attributes from arguments
@@ -145,10 +139,10 @@ class SensorSRFUtil:
 
     def return_band_names(
         self,
-        band_names: Optional[str] = None,
-        min_wl: Optional[float] = None,
-        max_wl: Optional[float] = None,
-    ) -> List[str]:
+        band_names: list[str] | str | None = None,
+        min_wl: float | None = None,
+        max_wl: float | None = None,
+    ) -> list[str] | str:
         """
         Returns band names for specified sensor bands
 
@@ -165,26 +159,16 @@ class SensorSRFUtil:
 
         selected_band_centres = self.return_band_centres(min_wl=min_wl, max_wl=max_wl)
 
-        selected_band_names = [
-            b
-            for b, c in zip(sensor_band_names, sensor_band_centres)
-            if c in selected_band_centres
-        ]
+        selected_band_names = [b for b, c in zip(sensor_band_names, sensor_band_centres) if c in selected_band_centres]
 
         if band_names is None:
-            band_names = selected_band_names
+            return selected_band_names
         else:
             if not set(band_names).issubset(set(selected_band_names)):
-                raise ValueError(
-                    "band names must be one of - " + str(selected_band_names)
-                )
-            band_names = band_names
+                raise ValueError("band names must be one of - " + str(selected_band_names))
+            return band_names
 
-        return band_names
-
-    def return_band_centres(
-        self, min_wl: Optional[float] = None, max_wl: Optional[float] = None
-    ) -> np.ndarray:
+    def return_band_centres(self, min_wl: float | None = None, max_wl: float | None = None) -> np.ndarray:
         """
         Returns band centres for specified sensor bands
 
@@ -197,9 +181,7 @@ class SensorSRFUtil:
         band_names = self.return_sensor_band_names()
 
         band_centres = [
-            self.sensor.rsr[band_name][self.detector_name]["central_wavelength"]
-            * self.sensor.si_scale
-            / 1e-9
+            self.sensor.rsr[band_name][self.detector_name]["central_wavelength"] * self.sensor.si_scale / 1e-9
             for band_name in band_names
         ]
 
@@ -213,7 +195,7 @@ class SensorSRFUtil:
 
         return band_centres
 
-    def return_sensor_band_names(self) -> List[str]:
+    def return_sensor_band_names(self) -> list[str]:
         """
         Returns list of all sensor band names
 
@@ -222,7 +204,7 @@ class SensorSRFUtil:
 
         return list(self.sensor.rsr.keys())
 
-    def return_srf(self, band_name: str) -> Tuple[np.ndarray, np.ndarray]:
+    def return_srf(self, band_name: str | None) -> tuple[np.ndarray, np.ndarray]:
         """
         Returns srf data for specified sensor band
 
@@ -232,9 +214,7 @@ class SensorSRFUtil:
         :return: band srf wavelength coordinates
         """
 
-        srf = self.sensor.rsr[band_name][self.detector_name][
-            "response"
-        ]  # gets rsr for given band
+        srf = self.sensor.rsr[band_name][self.detector_name]["response"]  # gets rsr for given band
         wl_srf = 1000 * self.sensor.rsr[band_name][self.detector_name]["wavelength"]
         return srf, wl_srf
 
@@ -244,7 +224,7 @@ class SensorSRFUtil:
         self.i = 0
         return self
 
-    def __next__(self) -> Tuple[np.ndarray, np.ndarray]:
+    def __next__(self) -> tuple[np.ndarray, np.ndarray]:
         """
         Returns ith function
 
@@ -254,7 +234,6 @@ class SensorSRFUtil:
 
         # Iterate through bands
         if self.i < len(self.band_names):
-
             # Update counter
             self.i += 1
 
