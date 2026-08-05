@@ -1,7 +1,7 @@
 """Module of resampling functions"""
 
 import re
-from typing import Dict, Optional, Protocol, Tuple, Type, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 import numpy as np
 import xarray as xr
@@ -9,10 +9,10 @@ from scipy import spatial
 
 __author__ = ["Maddie Stedman"]
 __all__ = [
+    "RegridCache",
+    "Resampler",
     "nearest_neighbour_resample",
     "resample",
-    "Resampler",
-    "RegridCache",
 ]
 
 
@@ -21,7 +21,7 @@ def _grid_spacing(
     y_source: np.ndarray,
     x_target: np.ndarray,
     y_target: np.ndarray,
-) -> Tuple[float, float, float, float]:
+) -> tuple[float, float, float, float]:
     """Typical pixel spacing of the source and target grids along each axis.
 
     Uses the median (rather than mean) grid step so that a single irregular
@@ -146,7 +146,7 @@ def _local_axis_geometry(x: np.ndarray, y: np.ndarray, axis: int, direction: boo
         zeros = np.zeros(x.shape)
         return spacing, zeros, zeros
 
-    def pad_before_after(a: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def pad_before_after(a: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         pad_width = [(0, 0)] * a.ndim
         pad_width[axis] = (1, 1)
         padded = np.pad(a, pad_width, mode="edge")
@@ -175,7 +175,7 @@ def _aggregate_valid(
     idx: np.ndarray,
     n_target: int,
     include_sumsq: bool = False,
-) -> Tuple[np.ndarray, Optional[np.ndarray], np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray | None, np.ndarray]:
     """Sum, (optionally) sum-of-squares, and count of the non-NaN values of
     ``data_in_range``, binned by ``idx``. NaNs are excluded from the
     aggregation entirely (rather than being summed in and propagating to
@@ -224,7 +224,7 @@ class Resampler(Protocol):
     ``regrid`` method.
     """
 
-    def regrid(self, data: np.ndarray, mask_invalid: bool = True) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    def regrid(self, data: np.ndarray, mask_invalid: bool = True) -> tuple[np.ndarray, np.ndarray | None]:
         """Resample 2D source data (matching the source grid this resampler
         was built for) onto its target grid.
 
@@ -394,7 +394,7 @@ class RegridCache:
 
     def _regrid(
         self, data: np.ndarray, mask_invalid: bool = True, include_std: bool = False
-    ) -> Tuple[np.ndarray, Optional[np.ndarray], Optional[np.ndarray]]:
+    ) -> tuple[np.ndarray, np.ndarray | None, np.ndarray | None]:
         """Shared implementation behind :meth:`regrid` (the public,
         Resampler-protocol-facing entry point) and
         :func:`nearest_neighbour_resample` (which additionally wants the
@@ -424,7 +424,7 @@ class RegridCache:
             std_target = np.where(mask_valid, std_target, np.nan)
         return data_target, std_target, mask_valid
 
-    def regrid(self, data: np.ndarray, mask_invalid: bool = True) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    def regrid(self, data: np.ndarray, mask_invalid: bool = True) -> tuple[np.ndarray, np.ndarray | None]:
         """
         Resample 2D data onto this cache's target grid, by averaging the
         source pixels nearest to each target pixel.
@@ -444,7 +444,7 @@ class RegridCache:
 #: configuration (e.g. RegridCache's regular_grid), build the resampler
 #: directly and pass it as resample()'s ``resampler=`` argument instead of
 #: going through this registry, which only ever uses each class's defaults.
-_RESAMPLERS: Dict[str, Type[Resampler]] = {
+_RESAMPLERS: dict[str, type[Resampler]] = {
     "nearest_neighbour": RegridCache,
 }
 
@@ -457,7 +457,7 @@ def nearest_neighbour_resample(
     y_target: np.ndarray,
     mask_invalid: bool = True,
     regular_grid: bool = False,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Resample 2D data by averaging nearest neighbour values. Invalid pixels set to nan if mask=True - invalid pixels defined as those with fewer than the automatically estimated expected number of source pixels binned to form the sample.
 
@@ -495,7 +495,7 @@ def resample(
     y_target: np.ndarray,
     mask_invalid: bool = True,
     method: str = "nearest_neighbour",
-    resampler: Optional[Resampler] = None,
+    resampler: Resampler | None = None,
 ) -> np.ndarray:
     """
     Resample variable data.

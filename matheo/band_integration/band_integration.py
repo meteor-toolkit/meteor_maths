@@ -3,18 +3,18 @@ Functions to band integrate spectra for given spectral response function.
 """
 
 import warnings
+from collections.abc import Callable, Iterable
+
+import numpy as np
+from comet_maths import interpolate_1d
 
 from matheo.band_integration.srf_utils import (
-    return_iter_srf,
     return_band_centres,
     return_band_names,
+    return_iter_srf,
 )
+from matheo.utils.function_def import f_gaussian, f_tophat, f_triangle, iter_f
 from matheo.utils.punpy_util import func_with_unc
-from matheo.utils.function_def import iter_f, f_tophat, f_triangle, f_gaussian
-import numpy as np
-import scipy.sparse
-from typing import Optional, Union, Tuple, List, Iterable, Callable
-from comet_maths import interpolate_1d
 
 __author__ = "Sam Hunt"
 __created__ = "30/7/2021"
@@ -23,9 +23,9 @@ __created__ = "30/7/2021"
 def cutout_nonzero(
     y: np.ndarray,
     x: np.ndarray,
-    buffer: Optional[Union[float, int]] = 0.2,
-    relative_threshold: Optional[Union[float, int]] = 0.0,
-) -> Tuple[np.ndarray, np.ndarray, List[int]]:
+    buffer: float | None = 0.2,
+    relative_threshold: float | None = 0.0,
+) -> tuple[np.ndarray, np.ndarray, list[int]]:
     """
     Returns continuous non-zero part of function y(x)
 
@@ -54,8 +54,8 @@ def cutout_nonzero(
     imin -= int(width * buffer)
     imax += int(width * buffer)
 
-    imin = imin if imin >= 0 else 0
-    imax = imax if imax <= len(y) else len(y)
+    imin = max(imin, 0)
+    imax = min(imax, len(y))
 
     return y[imin:imax], x[imin:imax], [imin, imax]
 
@@ -74,7 +74,7 @@ def get_x_offset(y, x, x_centre):
 
 
 def _band_int(
-    d: np.ndarray, x: np.ndarray, r: np.ndarray, x_r: np.ndarray, rint_norm: bool = True, **kwargs: Optional[dict]
+    d: np.ndarray, x: np.ndarray, r: np.ndarray, x_r: np.ndarray, rint_norm: bool = True, **kwargs: dict | None
 ) -> float:
     """
     Returns integral of data array over a response band (i.e., d(x) * r(x_r))
@@ -122,7 +122,7 @@ def _band_int(
 
 
 def _band_int_regular_grid(
-    d: np.ndarray, x: np.ndarray, r: np.ndarray, d_axis_x: int = 0, rint_norm: bool = True, **kwargs: Optional[dict]
+    d: np.ndarray, x: np.ndarray, r: np.ndarray, d_axis_x: int = 0, rint_norm: bool = True, **kwargs: dict | None
 ) -> np.ndarray:
     """
     Returns integral of data array over a response band(s) defined along common, even-spaced coordinates (i.e., d(x) * r(x))
@@ -172,7 +172,7 @@ def _band_int_arr(
     x_r: np.ndarray,
     d_axis_x: int = 0,
     rint_norm: bool = False,
-    **kwargs: Optional[dict],
+    **kwargs: dict | None,
 ) -> np.ndarray:
     """
     Band integrates multi-dimensional data array along x axis.
@@ -245,7 +245,7 @@ def _band_int2ax_arr(
     d_axis_x: int = 0,
     d_axis_y: int = 1,
     rint_norm: bool = True,
-    **kwargs: Optional[dict],
+    **kwargs: dict | None,
 ) -> np.ndarray:
     """
     Sequentially band integrates multi-dimensional data array along x axis and y axis
@@ -288,7 +288,7 @@ def _band_int3ax_arr(
     d_axis_y: int = 1,
     d_axis_z: int = 2,
     rint_norm: bool = True,
-    **kwargs: Optional[dict],
+    **kwargs: dict | None,
 ) -> np.ndarray:
     """
     Sequentially band integrates multi-dimensional data array along x, y and z axes
@@ -335,14 +335,14 @@ def band_int(
     r: np.ndarray,
     x_r: np.ndarray,
     d_axis_x: int = 0,
-    x_r_centre: Union[None, float] = None,
-    u_d: Union[None, float, np.ndarray] = None,
-    u_x: Union[None, float, np.ndarray] = None,
-    u_r: Union[None, float, np.ndarray] = None,
-    u_x_r: Union[None, float, np.ndarray] = None,
+    x_r_centre: None | float = None,
+    u_d: None | float | np.ndarray = None,
+    u_x: None | float | np.ndarray = None,
+    u_r: None | float | np.ndarray = None,
+    u_x_r: None | float | np.ndarray = None,
     rint_norm: bool = True,
-    **kwargs: Optional[dict],
-) -> Union[float, np.ndarray, Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]]:
+    **kwargs: dict | None,
+) -> float | np.ndarray | tuple[float | np.ndarray, float | np.ndarray]:
     """
     Returns integral of data array over a response band (i.e., d(x) * r(x_r))
 
@@ -411,18 +411,18 @@ def band_int2ax(
     y_ry: np.ndarray,
     d_axis_x: int = 0,
     d_axis_y: int = 0,
-    x_rx_centre: Union[None, float] = None,
-    y_ry_centre: Union[None, float] = None,
-    u_d: Union[None, float, np.ndarray] = None,
-    u_x: Union[None, float, np.ndarray] = None,
-    u_y: Union[None, float, np.ndarray] = None,
-    u_rx: Union[None, float, np.ndarray] = None,
-    u_x_rx: Union[None, float, np.ndarray] = None,
-    u_ry: Union[None, float, np.ndarray] = None,
-    u_y_ry: Union[None, float, np.ndarray] = None,
+    x_rx_centre: None | float = None,
+    y_ry_centre: None | float = None,
+    u_d: None | float | np.ndarray = None,
+    u_x: None | float | np.ndarray = None,
+    u_y: None | float | np.ndarray = None,
+    u_rx: None | float | np.ndarray = None,
+    u_x_rx: None | float | np.ndarray = None,
+    u_ry: None | float | np.ndarray = None,
+    u_y_ry: None | float | np.ndarray = None,
     rint_norm: bool = True,
-    **kwargs: Optional[dict],
-) -> Union[float, np.ndarray, Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]]:
+    **kwargs: dict | None,
+) -> float | np.ndarray | tuple[float | np.ndarray, float | np.ndarray]:
     """
     Sequentially band integrates multi-dimensional data array along x axis and y axis
 
@@ -495,22 +495,22 @@ def band_int3ax(
     d_axis_x: int = 0,
     d_axis_y: int = 1,
     d_axis_z: int = 2,
-    x_rx_centre: Union[None, float] = None,
-    y_ry_centre: Union[None, float] = None,
-    z_rz_centre: Union[None, float] = None,
-    u_d: Union[None, float, np.ndarray] = None,
-    u_x: Union[None, float, np.ndarray] = None,
-    u_y: Union[None, float, np.ndarray] = None,
-    u_z: Union[None, float, np.ndarray] = None,
-    u_rx: Union[None, float, np.ndarray] = None,
-    u_x_rx: Union[None, float, np.ndarray] = None,
-    u_ry: Union[None, float, np.ndarray] = None,
-    u_y_ry: Union[None, float, np.ndarray] = None,
-    u_rz: Union[None, float, np.ndarray] = None,
-    u_z_rz: Union[None, float, np.ndarray] = None,
+    x_rx_centre: None | float = None,
+    y_ry_centre: None | float = None,
+    z_rz_centre: None | float = None,
+    u_d: None | float | np.ndarray = None,
+    u_x: None | float | np.ndarray = None,
+    u_y: None | float | np.ndarray = None,
+    u_z: None | float | np.ndarray = None,
+    u_rx: None | float | np.ndarray = None,
+    u_x_rx: None | float | np.ndarray = None,
+    u_ry: None | float | np.ndarray = None,
+    u_y_ry: None | float | np.ndarray = None,
+    u_rz: None | float | np.ndarray = None,
+    u_z_rz: None | float | np.ndarray = None,
     rint_norm: bool = True,
-    **kwargs: Optional[dict],
-) -> Union[float, np.ndarray, Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]]:
+    **kwargs: dict | None,
+) -> float | np.ndarray | tuple[float | np.ndarray, float | np.ndarray]:
     """
     Sequentially band integrates multi-dimensional data array along x, y and z axes
 
@@ -598,13 +598,13 @@ def iter_band_int(
     x: np.ndarray,
     iter_r: Iterable,
     d_axis_x: int = 0,
-    u_d: Optional[Union[float, np.ndarray]] = None,
-    u_x: Optional[Union[float, np.ndarray]] = None,
-    u_r: Optional[Union[float, np.ndarray]] = None,
-    u_x_r: Optional[Union[float, np.ndarray]] = None,
-    rint_norm: Optional[bool] = True,
-    **kwargs: Optional[dict],
-) -> Union[float, np.ndarray, Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]]:
+    u_d: float | np.ndarray | None = None,
+    u_x: float | np.ndarray | None = None,
+    u_r: float | np.ndarray | None = None,
+    u_x_r: float | np.ndarray | None = None,
+    rint_norm: bool | None = True,
+    **kwargs: dict | None,
+) -> float | np.ndarray | tuple[float | np.ndarray, float | np.ndarray]:
     """
     Returns integral of data array over a set of response bands defined by iterator
 
@@ -666,12 +666,12 @@ def spectral_band_int_sensor(
     platform_name: str,
     sensor_name: str,
     detector_name: str = None,
-    band_names: Union[None, List[str]] = None,
+    band_names: None | list[str] = None,
     d_axis_wl: int = 0,
     u_d: np.ndarray = None,
     u_wl: np.ndarray = None,
-    **kwargs: Optional[dict],
-) -> Union[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray, np.ndarray]]:
+    **kwargs: dict | None,
+) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Returns spectral band integrated data array for named sensor spectral bands
 
@@ -714,7 +714,7 @@ def return_r_pixel(
     width_pixel: np.ndarray,
     x: np.ndarray,
     f: Callable,
-    x_pixel_off: Optional[float] = None,
+    x_pixel_off: float | None = None,
 ) -> np.ndarray:
     """
     Returns per pixel response function, expressed as an n_x X n_pixel matrix, where n_x is the length of wavelength coordinates of the response function defintion and n_pixel matrix is the number of pixels.
@@ -740,19 +740,19 @@ def return_r_pixel(
 def pixel_int(
     d: np.ndarray,
     x: np.ndarray,
-    x_pixel: Optional[np.ndarray] = None,
-    width_pixel: Optional[np.ndarray] = None,
-    u_d: Optional[Union[float, np.ndarray]] = None,
-    u_x: Optional[Union[float, np.ndarray]] = None,
-    u_x_pixel: Optional[Union[float, np.ndarray]] = None,
-    u_width_pixel: Optional[Union[float, np.ndarray]] = None,
-    band_shape: Union[Callable, str] = "triangle",
-    r_sampling: Optional[float] = None,
+    x_pixel: np.ndarray | None = None,
+    width_pixel: np.ndarray | None = None,
+    u_d: float | np.ndarray | None = None,
+    u_x: float | np.ndarray | None = None,
+    u_x_pixel: float | np.ndarray | None = None,
+    u_width_pixel: float | np.ndarray | None = None,
+    band_shape: Callable | str = "triangle",
+    r_sampling: float | None = None,
     d_axis_x: int = 0,
-    x_pixel_centre: Optional[float] = None,
+    x_pixel_centre: float | None = None,
     eval_iter: bool = False,
-    **kwargs: Optional[dict],
-) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
+    **kwargs: dict | None,
+) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
     Returns integral of data array over a set of response bands (i.e., d(x) * r_i(x_r) for i pixels)
 
@@ -837,7 +837,7 @@ def _band_int2d(
     psf: np.ndarray,
     x_psf: np.ndarray,
     y_psf: np.ndarray,
-    **kwargs: Optional[dict],
+    **kwargs: dict | None,
 ) -> float:
     """
     Returns integral of a 2D data array over a response band defined by a 2D point spread function
@@ -867,7 +867,7 @@ def _band_int2d_arr(
     y_psf: np.ndarray,
     d_axis_x: int = 0,
     d_axis_y: int = 1,
-    **kwargs: Optional[dict],
+    **kwargs: dict | None,
 ) -> np.ndarray:
     """
     Integrates two dimensional slice of multi-dimensional data array over a response band defined by a 2D point spread
@@ -899,14 +899,14 @@ def band_int2d(
     y_psf: np.ndarray,
     d_axis_x: int = 0,
     d_axis_y: int = 1,
-    u_d: Union[None, float, np.ndarray] = None,
-    u_x: Union[None, float, np.ndarray] = None,
-    u_y: Union[None, float, np.ndarray] = None,
-    u_psf: Union[None, float, np.ndarray] = None,
-    u_x_psf: Union[None, float, np.ndarray] = None,
-    u_y_psf: Union[None, float, np.ndarray] = None,
-    **kwargs: Optional[dict],
-) -> Union[float, np.ndarray, Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]]:
+    u_d: None | float | np.ndarray = None,
+    u_x: None | float | np.ndarray = None,
+    u_y: None | float | np.ndarray = None,
+    u_psf: None | float | np.ndarray = None,
+    u_x_psf: None | float | np.ndarray = None,
+    u_y_psf: None | float | np.ndarray = None,
+    **kwargs: dict | None,
+) -> float | np.ndarray | tuple[float | np.ndarray, float | np.ndarray]:
     """
     Returns integral of a 2D data array over a response band defined by a 2D point spread function
     (i.e., d(x, y) * psf(x_psf, y_psf))
@@ -962,14 +962,14 @@ def pixel_int2d(
     psf_shape: str = "triangle",
     d_axis_x: int = 0,
     d_axis_y: int = 0,
-    u_d: Union[None, float, np.ndarray] = None,
-    u_x: Union[None, float, np.ndarray] = None,
-    u_y: Union[None, float, np.ndarray] = None,
-    u_x_pixel: Union[None, float, np.ndarray] = None,
-    u_y_pixel: Union[None, float, np.ndarray] = None,
-    u_width_pixel: Union[None, float, np.ndarray] = None,
-    **kwargs: Optional[dict],
-) -> Tuple[np.ndarray, np.ndarray]:
+    u_d: None | float | np.ndarray = None,
+    u_x: None | float | np.ndarray = None,
+    u_y: None | float | np.ndarray = None,
+    u_x_pixel: None | float | np.ndarray = None,
+    u_y_pixel: None | float | np.ndarray = None,
+    u_width_pixel: None | float | np.ndarray = None,
+    **kwargs: dict | None,
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Returns integral of data array over a response band (i.e., d(x) * r(x_r))
 

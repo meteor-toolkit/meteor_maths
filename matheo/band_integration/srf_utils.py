@@ -2,10 +2,10 @@
 Functions to read spectral response function data with pyspectral
 """
 
+from collections.abc import Iterator
+
 import numpy as np
 from pyspectral.rsr_reader import RelativeSpectralResponse
-from typing import Union, List, Tuple, Iterator, Optional
-
 
 """___Authorship___"""
 __author__ = "Sam Hunt"
@@ -15,10 +15,10 @@ __created__ = "5/11/2020"
 def return_band_names(
     platform_name: str,
     sensor_name: str,
-    band_names: Optional[List[str]] = None,
-    min_wl: Optional[float] = None,
-    max_wl: Optional[float] = None,
-) -> List[str]:
+    band_names: list[str] | None = None,
+    min_wl: float | None = None,
+    max_wl: float | None = None,
+) -> list[str]:
     """
     Returns band names for specified sensor from `pyspectral <https://pyspectral.readthedocs.io/en/master/installation.html#static-data>`_ library.
 
@@ -38,10 +38,10 @@ def return_band_names(
 def return_band_centres(
     platform_name: str,
     sensor_name: str,
-    band_names: Optional[List[str]] = None,
-    detector_name: Optional[str] = None,
-    min_wl: Optional[float] = None,
-    max_wl: Optional[float] = None,
+    band_names: list[str] | None = None,
+    detector_name: str | None = None,
+    min_wl: float | None = None,
+    max_wl: float | None = None,
 ) -> np.ndarray:
     """
     Returns band centres for specified sensor from `pyspectral <https://pyspectral.readthedocs.io/en/master/installation.html#static-data>`_ library.
@@ -65,8 +65,8 @@ def return_srf(
     platform_name: str,
     sensor_name: str,
     band_name: str = None,
-    detector_name: Union[None, str] = None,
-) -> Tuple[np.ndarray, np.ndarray]:
+    detector_name: None | str = None,
+) -> tuple[np.ndarray, np.ndarray]:
     """
 
     Returns srf data for named band of for specified sensor from `pyspectral <https://pyspectral.readthedocs.io/en/master/installation.html#static-data>`_ library.
@@ -88,8 +88,8 @@ def return_srf(
 def return_iter_srf(
     platform_name: str,
     sensor_name: str,
-    band_names: Optional[List[str]] = None,
-    detector_name: Optional[str] = None,
+    band_names: list[str] | None = None,
+    detector_name: str | None = None,
 ) -> Iterator:
     """
     Returns iterable of band srfs for specified sensor from `pyspectral <https://pyspectral.readthedocs.io/en/master/installation.html#static-data>`_ library.
@@ -125,8 +125,8 @@ class SensorSRFUtil:
         self,
         platform_name,
         sensor_name,
-        detector_name: Union[None, str] = "det-1",
-        band_names: Union[None, List[str]] = None,
+        detector_name: None | str = "det-1",
+        band_names: None | list[str] = None,
     ):
 
         # Set attributes from arguments
@@ -139,10 +139,10 @@ class SensorSRFUtil:
 
     def return_band_names(
         self,
-        band_names: Optional[str] = None,
-        min_wl: Optional[float] = None,
-        max_wl: Optional[float] = None,
-    ) -> List[str]:
+        band_names: str | None = None,
+        min_wl: float | None = None,
+        max_wl: float | None = None,
+    ) -> list[str]:
         """
         Returns band names for specified sensor bands
 
@@ -170,7 +170,7 @@ class SensorSRFUtil:
 
         return band_names
 
-    def return_band_centres(self, min_wl: Optional[float] = None, max_wl: Optional[float] = None) -> np.ndarray:
+    def return_band_centres(self, min_wl: float | None = None, max_wl: float | None = None) -> np.ndarray:
         """
         Returns band centres for specified sensor bands
 
@@ -197,7 +197,7 @@ class SensorSRFUtil:
 
         return band_centres
 
-    def return_sensor_band_names(self) -> List[str]:
+    def return_sensor_band_names(self) -> list[str]:
         """
         Returns list of all sensor band names
 
@@ -206,7 +206,7 @@ class SensorSRFUtil:
 
         return list(self.sensor.rsr.keys())
 
-    def return_srf(self, band_name: str) -> Tuple[np.ndarray, np.ndarray]:
+    def return_srf(self, band_name: str) -> tuple[np.ndarray, np.ndarray]:
         """
         Returns srf data for specified sensor band
 
@@ -226,7 +226,7 @@ class SensorSRFUtil:
         self.i = 0
         return self
 
-    def __next__(self) -> Tuple[np.ndarray, np.ndarray]:
+    def __next__(self) -> tuple[np.ndarray, np.ndarray]:
         """
         Returns ith function
 

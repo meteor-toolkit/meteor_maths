@@ -1,9 +1,8 @@
 """Module of utility functions for algorithms"""
 
-from typing import Tuple
 
-from pyproj import Transformer, CRS
 import numpy as np
+from pyproj import CRS, Transformer
 
 
 def add_geolocation_error(
@@ -11,7 +10,7 @@ def add_geolocation_error(
     lon_error: float,
     lat_grid_deg: np.ndarray,
     lon_grid_deg: np.ndarray,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Add latitude & longitude errors (input in m) to latitude & longitudes grids given in degrees.
 

@@ -2,18 +2,18 @@
 Tests for sampling module
 """
 
-import numpy.testing
-
 import unittest
 from unittest.mock import MagicMock, patch
+
 import numpy as np
+import numpy.testing
 import xarray as xr
 
 from matheo.sampling import (
-    resample,
-    nearest_neighbour_resample,
-    Resampler,
     RegridCache,
+    Resampler,
+    nearest_neighbour_resample,
+    resample,
 )
 
 __author__ = "Maddie Stedman"

@@ -2,14 +2,14 @@
 Tests for band_integration module
 """
 
+import unittest
+from unittest.mock import call, patch
+
+import numpy as np
 import numpy.testing
 
 from matheo.band_integration import band_integration as bi
 from matheo.utils import function_def as fd
-import unittest
-from unittest.mock import patch, call
-import numpy as np
-
 
 """___Authorship___"""
 __author__ = "Sam Hunt"

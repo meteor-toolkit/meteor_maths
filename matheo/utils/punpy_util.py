@@ -2,11 +2,11 @@
 Functions to band integrate spectra for given spectral response function.
 """
 
-from punpy import MCPropagation
-import numpy as np
-from typing import Union, Callable, Tuple, Iterable, Dict
 import multiprocessing
+from collections.abc import Callable, Iterable
 
+import numpy as np
+from punpy import MCPropagation
 
 __author__ = "Sam Hunt"
 __created__ = "24/7/2020"
@@ -27,7 +27,7 @@ def _max_dim(arrays: Iterable[np.ndarray]) -> int:
     return max(dims)
 
 
-def _unc_to_dim(unc: Union[float, np.ndarray], dim: int, x: np.ndarray = None, x_len: int = None) -> np.ndarray:
+def _unc_to_dim(unc: float | np.ndarray, dim: int, x: np.ndarray = None, x_len: int = None) -> np.ndarray:
     """
     Scales up uncertainty to given dimension (e.g. float to full vector, vector to diagonal maxtrix)
 
@@ -64,10 +64,10 @@ def _unc_to_dim(unc: Union[float, np.ndarray], dim: int, x: np.ndarray = None, x
 
 def func_with_unc(
     f: Callable,
-    params: Dict[str, Union[float, np.ndarray]],
-    u_params: Dict[str, Union[None, float, np.ndarray]],
+    params: dict[str, float | np.ndarray],
+    u_params: dict[str, None | float | np.ndarray],
     parallel: bool = False,
-) -> Tuple[Union[float, np.ndarray], Union[None, float, np.ndarray]]:
+) -> tuple[float | np.ndarray, None | float | np.ndarray]:
     """
     Evaluate function and uncertainties using Monte Carlo method
 
@@ -96,7 +96,7 @@ def func_with_unc(
         return y, None
 
     # Add None's for any undefined uncertainties
-    u_params_missing = {k: None for k in params.keys() if k not in u_params}
+    u_params_missing = {k: None for k in params if k not in u_params}
     u_params = {**u_params, **u_params_missing}
 
     # Find max dimension of uncertainty data and match other variables
@@ -116,7 +116,7 @@ def func_with_unc(
         prop = MCPropagation(200, parallel_cores=1)
 
     x = [v for v in params.values()]
-    u_x = [u_params[k] for k in params.keys()]
+    u_x = [u_params[k] for k in params]
 
     if unc_dim == 1:
         u_y = prop.propagate_random(func=f, x=x, u_x=u_x)
