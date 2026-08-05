@@ -3,7 +3,7 @@ Functions to read spectral response function data with pyspectral
 """
 
 from collections.abc import Iterator
-from typing import List
+
 import numpy as np
 from pyspectral.rsr_reader import RelativeSpectralResponse
 
@@ -139,7 +139,7 @@ class SensorSRFUtil:
 
     def return_band_names(
         self,
-        band_names: List[str] | str | None = None,
+        band_names: list[str] | str | None = None,
         min_wl: float | None = None,
         max_wl: float | None = None,
     ) -> list[str] | str:
