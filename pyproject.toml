@@ -22,10 +22,6 @@ urls = { "Homepage" = "https://github.com/meteor-toolkit/matheo" }
 [tool.setuptools.dynamic]
 version = { attr = "matheo._version:__version__" }
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["matheo*"]
-exclude = ["tests"]
 
 [project.optional-dependencies]
 dev = [
