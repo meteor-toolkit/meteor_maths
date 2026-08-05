@@ -9,7 +9,7 @@ matheo
 The **matheo** module is a Python software package with mathematical algorithms for use in earth observation data and tools.
 
 **matheo** currently has a submodule for band integration, which can be used for spectrally integrating data with a sensor's spectral response function.
-It also has some utility that allows to define functions of various shapes.
+It also has a submodule for resampling gridded data from one grid onto another, and some utility that allows to define functions of various shapes.
 
 ~~~~~~~~~~~~~~
 

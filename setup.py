@@ -25,7 +25,8 @@ setup(
     description="Matheo is a python package with mathematical algorithms for use in Earth observation data and tools",
     long_description=read("README.md"),
     packages=find_packages(exclude=("tests",)),
-    install_requires=["pyspectral", "punpy>=1.0.7"],
+    python_requires=">=3.10",
+    install_requires=["pyspectral", "punpy>=1.0.7", "pyproj"],
     extras_require={
         "dev": [
             "pre-commit",
