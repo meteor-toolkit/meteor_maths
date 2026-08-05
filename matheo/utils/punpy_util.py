@@ -27,7 +27,7 @@ def _max_dim(arrays: Iterable[np.ndarray]) -> int:
     return max(dims)
 
 
-def _unc_to_dim(unc: float | np.ndarray, dim: int, x: np.ndarray = None, x_len: int = None) -> np.ndarray:
+def _unc_to_dim(unc: float | np.ndarray, dim: int, x: np.ndarray = None, x_len: int | None = None) -> np.ndarray:
     """
     Scales up uncertainty to given dimension (e.g. float to full vector, vector to diagonal maxtrix)
 
