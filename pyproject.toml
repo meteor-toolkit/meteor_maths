@@ -1,0 +1,76 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "matheo"
+description = "Matheo is a python package with mathematical algorithms for use in Earth observation data and tools"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "pyspectral",
+  "punpy>=1.0.7",
+  "pyproj",
+]
+authors = [
+  { name = "Sam Hunt", email = "sam.hunt@npl.co.uk" },
+  { name = "Pieter De Vis" },
+]
+license = { text = "None" }
+urls = { "Homepage" = "https://github.com/meteor-toolkit/matheo" }
+
+[tool.setuptools.dynamic]
+version = { attr = "matheo._version:__version__" }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["matheo*"]
+exclude = ["tests"]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "mypy",
+    "pre-commit",
+    "pytest",
+    "pytest-html",
+    "pytest-cov",
+    "ipython",
+]
+
+docs = [
+    "sphinx",
+    "sphinx_rtd_theme",
+    "sphinx_book_theme",
+    "sphinx_design",
+    "sphinx_automodapi",
+    "myst_parser",
+]
+
+[tool.setuptools.packages.find]
+include = ["matheo*"]
+
+[tool.setuptools_scm]
+# version inferred from git tags (e.g. v0.1.0); no extra config needed
+
+[tool.mypy]
+allow_untyped_globals = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["matheo.tests.*", "matheo.*.tests.*"]
+ignore_errors = true
+
+[tool.pytest.ini_options]
+testpaths = ["matheo", "tests"]
+
+[tool.ruff]
+line-length = 120
+exclude = ["docs"]
+
+[tool.ruff.lint]
+extend-ignore = ["W291"]
+
+[tool.ruff.lint.per-file-ignores]
+"matheo/__init__.py" = ["E402", "F401"]
+
