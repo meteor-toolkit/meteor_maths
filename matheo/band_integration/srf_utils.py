@@ -64,7 +64,7 @@ def return_band_centres(
 def return_srf(
     platform_name: str,
     sensor_name: str,
-    band_name: str = None,
+    band_name: str | None = None,
     detector_name: None | str = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
@@ -162,13 +162,11 @@ class SensorSRFUtil:
         selected_band_names = [b for b, c in zip(sensor_band_names, sensor_band_centres) if c in selected_band_centres]
 
         if band_names is None:
-            band_names = selected_band_names
+            return selected_band_names
         else:
             if not set(band_names).issubset(set(selected_band_names)):
                 raise ValueError("band names must be one of - " + str(selected_band_names))
-            band_names = band_names
-
-        return band_names
+            return band_names
 
     def return_band_centres(self, min_wl: float | None = None, max_wl: float | None = None) -> np.ndarray:
         """

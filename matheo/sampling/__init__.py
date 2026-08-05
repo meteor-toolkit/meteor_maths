@@ -1,6 +1,6 @@
 from matheo.sampling.sampling import (
-    RegridCache,
-    Resampler,
-    nearest_neighbour_resample,
-    resample,
+    RegridCache,  # noqa: F401
+    Resampler,  # noqa: F401
+    nearest_neighbour_resample,  # noqa: F401
+    resample,  # noqa: F401
 )

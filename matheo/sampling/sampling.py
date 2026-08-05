@@ -530,16 +530,15 @@ def resample(
             raise NotImplementedError(f"Method {method} not implemented.") from None
 
     # if source and target grid are the same, no resampling is necessary
-    if x_source.shape == x_target.shape:
-        if np.all(x_source == x_target) and np.all(y_source == y_target):
-            return ds[var].values
+    if x_source.shape == x_target.shape and np.all(x_source == x_target) and np.all(y_source == y_target):
+        return ds[var].values
 
     if resampler is None:
         resampler = resampler_cls(x_source, y_source, x_target, y_target)
 
     # create empty array for the processed data
-    x_dim = [dim for dim in ds[var].dims if re.search("^x_", dim)][0]
-    y_dim = [dim for dim in ds[var].dims if re.search("^y_", dim)][0]
+    x_dim = next(dim for dim in ds[var].dims if re.search("^x_", dim))
+    y_dim = next(dim for dim in ds[var].dims if re.search("^y_", dim))
     x_dim_idx = ds[var].dims.index(x_dim)
     y_dim_idx = ds[var].dims.index(y_dim)
     shape = list(ds[var].values.shape)

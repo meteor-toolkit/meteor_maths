@@ -370,8 +370,7 @@ def band_int(
 
     if np.min(x_r + x_r_off) < np.min(x) or np.max(x_r + x_r_off) > np.max(x):
         warnings.warn(
-            "The x_r coordinate range (%s-%s) exceeds the range of the x coordinate range (%s-%s), and the band integration can thus not be applied."
-            % (np.min(x_r), np.max(x_r), np.min(x), np.max(x))
+            f"The x_r coordinate range ({np.min(x_r)}-{np.max(x_r)}) exceeds the range of the x coordinate range ({np.min(x)}-{np.max(x)}), and the band integration can thus not be applied."
         )
         return np.nan
 
@@ -386,7 +385,7 @@ def band_int(
             rint_norm=rint_norm,
             **kwargs,
         ),
-        u_params=dict(d=u_d, x=u_x, r=u_r, x_r=u_x_r),
+        u_params={"d": u_d, "x": u_x, "r": u_r, "x_r": u_x_r},
     )
 
     if hasattr(d_band, "size") and d_band.size == 1:
@@ -472,7 +471,7 @@ def band_int2ax(
             rint_norm=rint_norm,
             **kwargs,
         ),
-        u_params=dict(d=u_d, x=u_x, y=u_y, rx=u_rx, x_rx=u_x_rx, ry=u_ry, y_ry=u_y_ry),
+        u_params={"d": u_d, "x": u_x, "y": u_y, "rx": u_rx, "x_rx": u_x_rx, "ry": u_ry, "y_ry": u_y_ry},
     )
 
     if u_d_band is None:
@@ -572,18 +571,18 @@ def band_int3ax(
         **kwargs,
     )
 
-    u_params = dict(
-        d=u_d,
-        x=u_x,
-        y=u_y,
-        z=u_z,
-        rx=u_rx,
-        x_rx=u_x_rx,
-        ry=u_ry,
-        y_ry=u_y_ry,
-        rz=u_rz,
-        z_rz=u_z_rz,
-    )
+    u_params = {
+        "d": u_d,
+        "x": u_x,
+        "y": u_y,
+        "z": u_z,
+        "rx": u_rx,
+        "x_rx": u_x_rx,
+        "ry": u_ry,
+        "y_ry": u_y_ry,
+        "rz": u_rz,
+        "z_rz": u_z_rz,
+    }
 
     d_band, u_d_band = func_with_unc(_band_int3ax_arr, params=params, u_params=u_params)
 
@@ -665,7 +664,7 @@ def spectral_band_int_sensor(
     wl: np.ndarray,
     platform_name: str,
     sensor_name: str,
-    detector_name: str = None,
+    detector_name: str | None = None,
     band_names: None | list[str] = None,
     d_axis_wl: int = 0,
     u_d: np.ndarray = None,
@@ -943,7 +942,7 @@ def band_int2d(
             d_axis_y=d_axis_y,
             **kwargs,
         ),
-        u_params=dict(d=u_d, x=u_x, y=u_y, psf=u_psf, x_psf=u_x_psf, y_psf=u_y_psf),
+        u_params={"d": u_d, "x": u_x, "y": u_y, "psf": u_psf, "x_psf": u_x_psf, "y_psf": u_y_psf},
     )
 
     if u_d_band is None:
