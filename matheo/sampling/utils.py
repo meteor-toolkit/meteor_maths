@@ -1,6 +1,5 @@
 """Module of utility functions for algorithms"""
 
-
 import numpy as np
 from pyproj import CRS, Transformer
 
