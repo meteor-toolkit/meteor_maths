@@ -2,9 +2,11 @@
 Tests for punpy_util module
 """
 
-from matheo.utils.punpy_util import _max_dim, _unc_to_dim, func_with_unc
 import unittest
+
 import numpy as np
+
+from matheo.utils.punpy_util import _max_dim, _unc_to_dim, func_with_unc
 
 """___Authorship___"""
 __author__ = "Sam Hunt"
