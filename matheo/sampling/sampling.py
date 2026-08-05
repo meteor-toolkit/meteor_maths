@@ -457,7 +457,7 @@ def nearest_neighbour_resample(
     y_target: np.ndarray,
     mask_invalid: bool = True,
     regular_grid: bool = False,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray | None]:
     """
     Resample 2D data by averaging nearest neighbour values. Invalid pixels set to nan if mask=True - invalid pixels defined as those with fewer than the automatically estimated expected number of source pixels binned to form the sample.
 
@@ -537,8 +537,8 @@ def resample(
         resampler = resampler_cls(x_source, y_source, x_target, y_target)
 
     # create empty array for the processed data
-    x_dim = next(dim for dim in ds[var].dims if re.search("^x_", dim))
-    y_dim = next(dim for dim in ds[var].dims if re.search("^y_", dim))
+    x_dim = next(dim for dim in ds[var].dims if re.search("^x_", str(dim)))
+    y_dim = next(dim for dim in ds[var].dims if re.search("^y_", str(dim)))
     x_dim_idx = ds[var].dims.index(x_dim)
     y_dim_idx = ds[var].dims.index(y_dim)
     shape = list(ds[var].values.shape)
