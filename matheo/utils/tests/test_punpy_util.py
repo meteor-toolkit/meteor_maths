@@ -55,7 +55,7 @@ class TestPunpyUtils(unittest.TestCase):
         def poly(x1, x2, x3):
             return x1**2 + 3 * x2 + x3
 
-        y, u_y = func_with_unc(
+        y, _ = func_with_unc(
             poly,
             params={"x1": np.array([1, 2, 3]), "x2": np.array([1, 2, 3]), "x3": 1},
             u_params={"x1": 0.1, "x2": np.array([3, 3, 3])},
