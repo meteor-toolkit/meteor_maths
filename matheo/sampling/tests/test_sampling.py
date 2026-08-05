@@ -28,11 +28,11 @@ class TestSampling(unittest.TestCase):
             "x_target": 8,
             "y_target": 8,
         }
-        fv = 9.969209968386869e36
+        _ = 9.969209968386869e36
 
         test_ds = xr.Dataset(
-            data_vars=dict(
-                data_3d_source=(
+            data_vars={
+                "data_3d_source": (
                     ["bands", "x_source", "y_source"],
                     np.ones(
                         (
@@ -42,7 +42,7 @@ class TestSampling(unittest.TestCase):
                         )
                     ),
                 ),
-                data_3d_target=(
+                "data_3d_target": (
                     ["bands", "x_target", "y_target"],
                     np.ones(
                         (
@@ -52,7 +52,7 @@ class TestSampling(unittest.TestCase):
                         )
                     ),
                 ),
-                data_2d_source=(
+                "data_2d_source": (
                     ["x_source", "y_source"],
                     np.ones(
                         (
@@ -61,23 +61,23 @@ class TestSampling(unittest.TestCase):
                         )
                     ),
                 ),
-                coord1_source=(
+                "coord1_source": (
                     ["x_source", "y_source"],
                     np.ones((size_dict["x_source"], size_dict["y_source"])),
                 ),
-                coord2_source=(
+                "coord2_source": (
                     ["x_source", "y_source"],
                     2 * np.ones((size_dict["x_source"], size_dict["y_source"])),
                 ),
-                coord1_target=(
+                "coord1_target": (
                     ["x_target", "y_target"],
                     np.ones((size_dict["x_target"], size_dict["y_target"])),
                 ),
-                coord2_target=(
+                "coord2_target": (
                     ["x_target", "y_target"],
                     2 * np.ones((size_dict["x_target"], size_dict["y_target"])),
                 ),
-            ),
+            },
         )
 
         self.test_ds = test_ds
@@ -300,12 +300,10 @@ class TestSampling(unittest.TestCase):
         x_target = np.array([[1.0, 4.0, 7.0, 10.0, 13.0]] * 6)
         y_target = np.array([[1.0] * 5, [4.0] * 5, [7.0] * 5, [10.0] * 5, [13.0] * 5, [16.0] * 5])
         ds = xr.Dataset(
-            data_vars=dict(
-                # dims ordered [y_source, x_source] to match the array shape
-                # (18, 15) produced by meshgrid(arange(15), arange(18)) above
-                var_a=(["y_source", "x_source"], np.vstack([np.arange(15)] * 18)),
-                var_b=(["y_source", "x_source"], np.vstack([np.arange(15)] * 18) * 2),
-            )
+            data_vars={
+                "var_a": (["y_source", "x_source"], np.vstack([np.arange(15)] * 18)),
+                "var_b": (["y_source", "x_source"], np.vstack([np.arange(15)] * 18) * 2),
+            }
         )
 
         cache = RegridCache(x_source, y_source, x_target, y_target)
@@ -620,7 +618,7 @@ class TestRegridCache(unittest.TestCase):
         # n_min_source is computed lazily on first access (it needs its own
         # KDTree query); force that here so the patch below only guards
         # against *further* KDTree construction while reusing the cache
-        cache.n_min_source
+        _ = cache.n_min_source
 
         # the cache's trees were already built above; regridding the three
         # fields below must not need to construct any new ones
