@@ -16,8 +16,10 @@ dependencies = [
 ]
 authors = [{name = "MetEOR Toolkit Team", email = "team@comet-toolkit.org"}]
 license-files = ["LICENSE"]
-urls = { "Homepage" = "https://github.com/meteor-toolkit/matheo" }
 
+[project.urls]
+Homepage = "https://www.comet-toolkit.org/meteor/"
+Documentation = "https://meteor-toolkit.github.io/matheo/"
 
 [project.optional-dependencies]
 dev = [
