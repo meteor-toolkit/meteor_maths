@@ -85,23 +85,17 @@ def _expected_source_count(dx_target, dy_target, dx_source, dy_source):
             ratio = target_spacing / source_spacing
         return np.where(degenerate, 1.0, ratio)
 
-    expected_n_source = axis_ratio(dx_target, dx_source) * axis_ratio(
-        dy_target, dy_source
-    )
+    expected_n_source = axis_ratio(dx_target, dx_source) * axis_ratio(dy_target, dy_source)
     return np.maximum(1, np.floor(expected_n_source + _FLOOR_EPSILON))
 
 
-def _estimate_n_min_source(
-    dx_source: float, dy_source: float, dx_target: float, dy_target: float
-) -> int:
+def _estimate_n_min_source(dx_source: float, dy_source: float, dx_target: float, dy_target: float) -> int:
     """Estimate the number of source pixels expected to fall within a target
     pixel footprint, from the relative pixel spacing of the two grids."""
     return int(_expected_source_count(dx_target, dy_target, dx_source, dy_source))
 
 
-def _local_axis_geometry(
-    x: np.ndarray, y: np.ndarray, axis: int, direction: bool = True
-):
+def _local_axis_geometry(x: np.ndarray, y: np.ndarray, axis: int, direction: bool = True):
     """Per-pixel local grid spacing (and, unless ``direction=False``, unit
     direction vector) along one array axis of a structured 2D grid (as from
     ``numpy.meshgrid``), estimated from the distance to a pixel's two
@@ -230,9 +224,7 @@ class Resampler(Protocol):
     ``regrid`` method.
     """
 
-    def regrid(
-        self, data: np.ndarray, mask_invalid: bool = True
-    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    def regrid(self, data: np.ndarray, mask_invalid: bool = True) -> Tuple[np.ndarray, Optional[np.ndarray]]:
         """Resample 2D source data (matching the source grid this resampler
         was built for) onto its target grid.
 
@@ -322,8 +314,8 @@ class RegridCache:
         offset_y = self._grid_source[:, 1] - grid_target[idx, 1]
 
         if regular_grid:
-            self._dx_source, self._dy_source, self._dx_target, self._dy_target = (
-                _grid_spacing(x_source, y_source, x_target, y_target)
+            self._dx_source, self._dy_source, self._dx_target, self._dy_target = _grid_spacing(
+                x_source, y_source, x_target, y_target
             )
             dx_target_local = np.full(x_target.size, self._dx_target)
             dy_target_local = np.full(x_target.size, self._dy_target)
@@ -340,12 +332,8 @@ class RegridCache:
             # varies correctly across grids whose resolution changes across
             # their extent, or that are anisotropic (different spacing along
             # one array axis than the other).
-            dx_target_local, col_ux, col_uy = _local_axis_geometry(
-                x_target, y_target, axis=1
-            )
-            dy_target_local, row_ux, row_uy = _local_axis_geometry(
-                x_target, y_target, axis=0
-            )
+            dx_target_local, col_ux, col_uy = _local_axis_geometry(x_target, y_target, axis=1)
+            dy_target_local, row_ux, row_uy = _local_axis_geometry(x_target, y_target, axis=0)
             dx_target_local = dx_target_local.ravel()
             dy_target_local = dy_target_local.ravel()
             col_ux, col_uy = col_ux.ravel(), col_uy.ravel()
@@ -375,9 +363,7 @@ class RegridCache:
         if self._n_min_source is not None:
             return
         if self.regular_grid:
-            n_min_source = _estimate_n_min_source(
-                self._dx_source, self._dy_source, self._dx_target, self._dy_target
-            )
+            n_min_source = _estimate_n_min_source(self._dx_source, self._dy_source, self._dx_target, self._dy_target)
         else:
             n_min_source = self._estimate_local_n_min_source()
         self._n_min_source = n_min_source
@@ -392,16 +378,10 @@ class RegridCache:
         distance systematically over- or under-shoots vs. a Poisson process,
         e.g. by a factor of 4/pi for k=4), which is exactly the common case
         here - a fairly regular, if locally-varying, source grid."""
-        dx_source_2d = _local_axis_geometry(
-            self.x_source, self.y_source, axis=1, direction=False
-        )
-        dy_source_2d = _local_axis_geometry(
-            self.x_source, self.y_source, axis=0, direction=False
-        )
+        dx_source_2d = _local_axis_geometry(self.x_source, self.y_source, axis=1, direction=False)
+        dy_source_2d = _local_axis_geometry(self.x_source, self.y_source, axis=0, direction=False)
         source_tree = spatial.cKDTree(self._grid_source)
-        _, nearest_source_idx = source_tree.query(
-            np.c_[self.x_target.ravel(), self.y_target.ravel()], k=1
-        )
+        _, nearest_source_idx = source_tree.query(np.c_[self.x_target.ravel(), self.y_target.ravel()], k=1)
         local_source_dx = dx_source_2d.ravel()[nearest_source_idx]
         local_source_dy = dy_source_2d.ravel()[nearest_source_idx]
         expected_n_source = _expected_source_count(
@@ -444,9 +424,7 @@ class RegridCache:
             std_target = np.where(mask_valid, std_target, np.nan)
         return data_target, std_target, mask_valid
 
-    def regrid(
-        self, data: np.ndarray, mask_invalid: bool = True
-    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    def regrid(self, data: np.ndarray, mask_invalid: bool = True) -> Tuple[np.ndarray, Optional[np.ndarray]]:
         """
         Resample 2D data onto this cache's target grid, by averaging the
         source pixels nearest to each target pixel.
@@ -455,9 +433,7 @@ class RegridCache:
         :param mask_invalid: boolean for setting invalid target pixels (fewer than n_min_source non-NaN contributing source pixels) to nan. If False, validity is not computed at all (it can be the expensive part of the estimate for irregular grids), and None is returned in its place.
         :return: resampled 2D data, boolean mask that is True where a target pixel is valid (or None if mask_invalid is False)
         """
-        data_target, _, mask_valid = self._regrid(
-            data, mask_invalid=mask_invalid, include_std=False
-        )
+        data_target, _, mask_valid = self._regrid(data, mask_invalid=mask_invalid, include_std=False)
         return data_target, mask_valid
 
 
@@ -506,9 +482,7 @@ def nearest_neighbour_resample(
         y_target,
         regular_grid=regular_grid,
     )
-    data_target, std_target, _ = cache._regrid(
-        data, mask_invalid=mask_invalid, include_std=True
-    )
+    data_target, std_target, _ = cache._regrid(data, mask_invalid=mask_invalid, include_std=True)
     return data_target, std_target
 
 

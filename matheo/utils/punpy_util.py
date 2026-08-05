@@ -27,9 +27,7 @@ def _max_dim(arrays: Iterable[np.ndarray]) -> int:
     return max(dims)
 
 
-def _unc_to_dim(
-    unc: Union[float, np.ndarray], dim: int, x: np.ndarray = None, x_len: int = None
-) -> np.ndarray:
+def _unc_to_dim(unc: Union[float, np.ndarray], dim: int, x: np.ndarray = None, x_len: int = None) -> np.ndarray:
     """
     Scales up uncertainty to given dimension (e.g. float to full vector, vector to diagonal maxtrix)
 
@@ -43,9 +41,7 @@ def _unc_to_dim(
     original_dim = np.ndim(unc)
 
     if (original_dim > 2) or (dim > 2):
-        raise ValueError(
-            "Can only raise uncertainty to a max dimension of 2 (e.g. covariance matrix)"
-        )
+        raise ValueError("Can only raise uncertainty to a max dimension of 2 (e.g. covariance matrix)")
 
     if original_dim == dim:
         return unc
@@ -54,9 +50,7 @@ def _unc_to_dim(
     else:
         if original_dim == 0:
             if (x is None) and (x_len is None):
-                raise AttributeError(
-                    "Please define either x or x_len to raise dimension of shape 0 uncertainty"
-                )
+                raise AttributeError("Please define either x or x_len to raise dimension of shape 0 uncertainty")
             elif x is not None:
                 unc *= x
             else:

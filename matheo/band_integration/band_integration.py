@@ -74,12 +74,7 @@ def get_x_offset(y, x, x_centre):
 
 
 def _band_int(
-    d: np.ndarray,
-    x: np.ndarray,
-    r: np.ndarray,
-    x_r: np.ndarray,
-    rint_norm: bool = True,
-    **kwargs: Optional[dict]
+    d: np.ndarray, x: np.ndarray, r: np.ndarray, x_r: np.ndarray, rint_norm: bool = True, **kwargs: Optional[dict]
 ) -> float:
     """
     Returns integral of data array over a response band (i.e., d(x) * r(x_r))
@@ -127,12 +122,7 @@ def _band_int(
 
 
 def _band_int_regular_grid(
-    d: np.ndarray,
-    x: np.ndarray,
-    r: np.ndarray,
-    d_axis_x: int = 0,
-    rint_norm: bool = True,
-    **kwargs: Optional[dict]
+    d: np.ndarray, x: np.ndarray, r: np.ndarray, d_axis_x: int = 0, rint_norm: bool = True, **kwargs: Optional[dict]
 ) -> np.ndarray:
     """
     Returns integral of data array over a response band(s) defined along common, even-spaced coordinates (i.e., d(x) * r(x))
@@ -182,7 +172,7 @@ def _band_int_arr(
     x_r: np.ndarray,
     d_axis_x: int = 0,
     rint_norm: bool = False,
-    **kwargs: Optional[dict]
+    **kwargs: Optional[dict],
 ) -> np.ndarray:
     """
     Band integrates multi-dimensional data array along x axis.
@@ -208,26 +198,18 @@ def _band_int_arr(
     # Else run _band_int
     # If single band response function defined, run once
     if r.ndim == 1:
-
         # If d has multiple dims, ensure integration done along correct axis
         if d.ndim == 1:
-            return np.array(
-                [_band_int(d, x=x, r=r, x_r=x_r, rint_norm=rint_norm, **kwargs)]
-            )
-        return np.apply_along_axis(
-            _band_int, d_axis_x, arr=d, x=x, r=r, x_r=x_r, rint_norm=rint_norm, **kwargs
-        )
+            return np.array([_band_int(d, x=x, r=r, x_r=x_r, rint_norm=rint_norm, **kwargs)])
+        return np.apply_along_axis(_band_int, d_axis_x, arr=d, x=x, r=r, x_r=x_r, rint_norm=rint_norm, **kwargs)
 
     # If multiple band response functions defined, run multiple times
     elif r.ndim == 2:
-
         # If d has multiple dims, ensure integration done along correct axis
         if d.ndim == 1:
             d_int = np.zeros(len(r))
             for i in range(len(d_int)):
-                d_int[i] = _band_int(
-                    d, x=x, r=r[i], x_r=x_r, rint_norm=rint_norm, **kwargs
-                )
+                d_int[i] = _band_int(d, x=x, r=r[i], x_r=x_r, rint_norm=rint_norm, **kwargs)
 
         else:
             # (this bit could probably be accelerated)
@@ -263,7 +245,7 @@ def _band_int2ax_arr(
     d_axis_x: int = 0,
     d_axis_y: int = 1,
     rint_norm: bool = True,
-    **kwargs: Optional[dict]
+    **kwargs: Optional[dict],
 ) -> np.ndarray:
     """
     Sequentially band integrates multi-dimensional data array along x axis and y axis
@@ -285,12 +267,8 @@ def _band_int2ax_arr(
     :return: band integrated data
     """
 
-    d_intx = _band_int_arr(
-        d, x=x, r=rx, x_r=x_rx, d_axis_x=d_axis_x, rint_norm=rint_norm, **kwargs
-    )
-    d_intx_inty = _band_int_arr(
-        d_intx, x=y, r=ry, x_r=y_ry, d_axis_x=d_axis_y, rint_norm=rint_norm, **kwargs
-    )
+    d_intx = _band_int_arr(d, x=x, r=rx, x_r=x_rx, d_axis_x=d_axis_x, rint_norm=rint_norm, **kwargs)
+    d_intx_inty = _band_int_arr(d_intx, x=y, r=ry, x_r=y_ry, d_axis_x=d_axis_y, rint_norm=rint_norm, **kwargs)
 
     return d_intx_inty
 
@@ -310,7 +288,7 @@ def _band_int3ax_arr(
     d_axis_y: int = 1,
     d_axis_z: int = 2,
     rint_norm: bool = True,
-    **kwargs: Optional[dict]
+    **kwargs: Optional[dict],
 ) -> np.ndarray:
     """
     Sequentially band integrates multi-dimensional data array along x, y and z axes
@@ -336,12 +314,8 @@ def _band_int3ax_arr(
     :return: band integrated data
     """
 
-    d_intx = _band_int_arr(
-        d, x=x, r=rx, x_r=x_rx, d_axis_x=d_axis_x, rint_norm=rint_norm, **kwargs
-    )
-    d_intx_inty = _band_int_arr(
-        d_intx, x=y, r=ry, x_r=y_ry, d_axis_x=d_axis_y, rint_norm=rint_norm, **kwargs
-    )
+    d_intx = _band_int_arr(d, x=x, r=rx, x_r=x_rx, d_axis_x=d_axis_x, rint_norm=rint_norm, **kwargs)
+    d_intx_inty = _band_int_arr(d_intx, x=y, r=ry, x_r=y_ry, d_axis_x=d_axis_y, rint_norm=rint_norm, **kwargs)
     d_intx_inty_intz = _band_int_arr(
         d_intx_inty,
         x=z,
@@ -367,10 +341,8 @@ def band_int(
     u_r: Union[None, float, np.ndarray] = None,
     u_x_r: Union[None, float, np.ndarray] = None,
     rint_norm: bool = True,
-    **kwargs: Optional[dict]
-) -> Union[
-    float, np.ndarray, Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]
-]:
+    **kwargs: Optional[dict],
+) -> Union[float, np.ndarray, Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]]:
     """
     Returns integral of data array over a response band (i.e., d(x) * r(x_r))
 
@@ -449,10 +421,8 @@ def band_int2ax(
     u_ry: Union[None, float, np.ndarray] = None,
     u_y_ry: Union[None, float, np.ndarray] = None,
     rint_norm: bool = True,
-    **kwargs: Optional[dict]
-) -> Union[
-    float, np.ndarray, Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]
-]:
+    **kwargs: Optional[dict],
+) -> Union[float, np.ndarray, Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]]:
     """
     Sequentially band integrates multi-dimensional data array along x axis and y axis
 
@@ -539,10 +509,8 @@ def band_int3ax(
     u_rz: Union[None, float, np.ndarray] = None,
     u_z_rz: Union[None, float, np.ndarray] = None,
     rint_norm: bool = True,
-    **kwargs: Optional[dict]
-) -> Union[
-    float, np.ndarray, Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]
-]:
+    **kwargs: Optional[dict],
+) -> Union[float, np.ndarray, Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]]:
     """
     Sequentially band integrates multi-dimensional data array along x, y and z axes
 
@@ -635,10 +603,8 @@ def iter_band_int(
     u_r: Optional[Union[float, np.ndarray]] = None,
     u_x_r: Optional[Union[float, np.ndarray]] = None,
     rint_norm: Optional[bool] = True,
-    **kwargs: Optional[dict]
-) -> Union[
-    float, np.ndarray, Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]
-]:
+    **kwargs: Optional[dict],
+) -> Union[float, np.ndarray, Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]]:
     """
     Returns integral of data array over a set of response bands defined by iterator
 
@@ -665,7 +631,6 @@ def iter_band_int(
 
     # Evaluate band integrate
     for i, (r_i, x_r_i) in enumerate(iter_r):
-
         # define slice ith band integrated data needs to populate in d_band
         sli = [slice(None)] * d_band.ndim
         sli[d_axis_x] = i
@@ -673,9 +638,7 @@ def iter_band_int(
 
         # evaluate band integral
         if (u_d is None) and (u_x is None) and (u_r is None) and (u_x_r is None):
-            d_band[sli] = band_int(
-                d, x, r_i, x_r_i, d_axis_x, rint_norm=rint_norm, **kwargs
-            )
+            d_band[sli] = band_int(d, x, r_i, x_r_i, d_axis_x, rint_norm=rint_norm, **kwargs)
         else:
             d_band[sli], u_d_band[sli] = band_int(
                 d,
@@ -707,7 +670,7 @@ def spectral_band_int_sensor(
     d_axis_wl: int = 0,
     u_d: np.ndarray = None,
     u_wl: np.ndarray = None,
-    **kwargs: Optional[dict]
+    **kwargs: Optional[dict],
 ) -> Union[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray, np.ndarray]]:
     """
     Returns spectral band integrated data array for named sensor spectral bands
@@ -732,23 +695,17 @@ def spectral_band_int_sensor(
     # Find bands within data spectral range
     band_names = return_band_names(platform_name, sensor_name, band_names)
     band_centres = return_band_centres(platform_name, sensor_name, band_names)
-    valid_idx = np.where(
-        np.logical_and(band_centres < max(wl), band_centres > min(wl))
-    )[0]
+    valid_idx = np.where(np.logical_and(band_centres < max(wl), band_centres > min(wl)))[0]
     band_centres = band_centres[valid_idx]
     band_names = [band_names[i] for i in valid_idx]
 
     # Evaluate band integral
-    iter_srf = return_iter_srf(
-        platform_name, sensor_name, band_names, detector_name=detector_name
-    )
+    iter_srf = return_iter_srf(platform_name, sensor_name, band_names, detector_name=detector_name)
 
     if (u_d is None) and (u_wl is None):
         return iter_band_int(d, wl, iter_srf, d_axis_wl, **kwargs), band_centres
 
-    d_band, u_d_band = iter_band_int(
-        d, wl, iter_srf, d_axis_wl, u_d=u_d, u_x=u_wl, **kwargs
-    )
+    d_band, u_d_band = iter_band_int(d, wl, iter_srf, d_axis_wl, u_d=u_d, u_x=u_wl, **kwargs)
     return d_band, band_centres, u_d_band
 
 
@@ -794,7 +751,7 @@ def pixel_int(
     d_axis_x: int = 0,
     x_pixel_centre: Optional[float] = None,
     eval_iter: bool = False,
-    **kwargs: Optional[dict]
+    **kwargs: Optional[dict],
 ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
     """
     Returns integral of data array over a set of response bands (i.e., d(x) * r_i(x_r) for i pixels)
@@ -820,11 +777,7 @@ def pixel_int(
     """
 
     # If x_pixel_centre defined compute offset for x_pixel array
-    x_pixel_off = (
-        x_pixel_centre - ((x_pixel.max() - x_pixel.min()) / 2.0)
-        if x_pixel_centre is not None
-        else 0
-    )
+    x_pixel_off = x_pixel_centre - ((x_pixel.max() - x_pixel.min()) / 2.0) if x_pixel_centre is not None else 0
 
     # Get function
     if band_shape == "triangle":
@@ -852,7 +805,6 @@ def pixel_int(
         )
 
     else:
-
         # Define r x coordinates
         x_r_pixel = x
 
@@ -885,7 +837,7 @@ def _band_int2d(
     psf: np.ndarray,
     x_psf: np.ndarray,
     y_psf: np.ndarray,
-    **kwargs: Optional[dict]
+    **kwargs: Optional[dict],
 ) -> float:
     """
     Returns integral of a 2D data array over a response band defined by a 2D point spread function
@@ -915,7 +867,7 @@ def _band_int2d_arr(
     y_psf: np.ndarray,
     d_axis_x: int = 0,
     d_axis_y: int = 1,
-    **kwargs: Optional[dict]
+    **kwargs: Optional[dict],
 ) -> np.ndarray:
     """
     Integrates two dimensional slice of multi-dimensional data array over a response band defined by a 2D point spread
@@ -953,10 +905,8 @@ def band_int2d(
     u_psf: Union[None, float, np.ndarray] = None,
     u_x_psf: Union[None, float, np.ndarray] = None,
     u_y_psf: Union[None, float, np.ndarray] = None,
-    **kwargs: Optional[dict]
-) -> Union[
-    float, np.ndarray, Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]
-]:
+    **kwargs: Optional[dict],
+) -> Union[float, np.ndarray, Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]]:
     """
     Returns integral of a 2D data array over a response band defined by a 2D point spread function
     (i.e., d(x, y) * psf(x_psf, y_psf))
@@ -1018,7 +968,7 @@ def pixel_int2d(
     u_x_pixel: Union[None, float, np.ndarray] = None,
     u_y_pixel: Union[None, float, np.ndarray] = None,
     u_width_pixel: Union[None, float, np.ndarray] = None,
-    **kwargs: Optional[dict]
+    **kwargs: Optional[dict],
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Returns integral of data array over a response band (i.e., d(x) * r(x_r))

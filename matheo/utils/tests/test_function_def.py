@@ -18,18 +18,14 @@ class TestFunctionDef(unittest.TestCase):
         x = np.arange(0, 11, 1)
         y = fd.f_tophat(x, 5, 4)
 
-        np.testing.assert_array_equal(
-            y, np.array([0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
-        )
+        np.testing.assert_array_equal(y, np.array([0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0]))
 
     def test_f_triangle(self):
 
         x = np.arange(0, 11, 1)
         y = fd.f_triangle(x, 5, 2)
 
-        np.testing.assert_array_equal(
-            y, np.array([0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 0.5, 0.0, 0.0, 0.0, 0.0])
-        )
+        np.testing.assert_array_equal(y, np.array([0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 0.5, 0.0, 0.0, 0.0, 0.0]))
 
     def test_f_gaussian(self):
 

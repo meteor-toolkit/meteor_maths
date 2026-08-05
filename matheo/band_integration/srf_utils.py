@@ -32,9 +32,7 @@ def return_band_names(
     """
 
     srf_util = SensorSRFUtil(platform_name, sensor_name)
-    return srf_util.return_band_names(
-        band_names=band_names, min_wl=min_wl, max_wl=max_wl
-    )
+    return srf_util.return_band_names(band_names=band_names, min_wl=min_wl, max_wl=max_wl)
 
 
 def return_band_centres(
@@ -59,9 +57,7 @@ def return_band_centres(
     :return: band centres in nm
     """
 
-    srf_util = SensorSRFUtil(
-        platform_name, sensor_name, detector_name, band_names=band_names
-    )
+    srf_util = SensorSRFUtil(platform_name, sensor_name, detector_name, band_names=band_names)
     return srf_util.return_band_centres(min_wl=min_wl, max_wl=max_wl)
 
 
@@ -107,9 +103,7 @@ def return_iter_srf(
     :return: iterable that returns band srf and srf wavelength coordinates at each iteration
     """
 
-    srf_util = SensorSRFUtil(
-        platform_name, sensor_name, detector_name, band_names=band_names
-    )
+    srf_util = SensorSRFUtil(platform_name, sensor_name, detector_name, band_names=band_names)
     return iter(srf_util)
 
 
@@ -165,26 +159,18 @@ class SensorSRFUtil:
 
         selected_band_centres = self.return_band_centres(min_wl=min_wl, max_wl=max_wl)
 
-        selected_band_names = [
-            b
-            for b, c in zip(sensor_band_names, sensor_band_centres)
-            if c in selected_band_centres
-        ]
+        selected_band_names = [b for b, c in zip(sensor_band_names, sensor_band_centres) if c in selected_band_centres]
 
         if band_names is None:
             band_names = selected_band_names
         else:
             if not set(band_names).issubset(set(selected_band_names)):
-                raise ValueError(
-                    "band names must be one of - " + str(selected_band_names)
-                )
+                raise ValueError("band names must be one of - " + str(selected_band_names))
             band_names = band_names
 
         return band_names
 
-    def return_band_centres(
-        self, min_wl: Optional[float] = None, max_wl: Optional[float] = None
-    ) -> np.ndarray:
+    def return_band_centres(self, min_wl: Optional[float] = None, max_wl: Optional[float] = None) -> np.ndarray:
         """
         Returns band centres for specified sensor bands
 
@@ -197,9 +183,7 @@ class SensorSRFUtil:
         band_names = self.return_sensor_band_names()
 
         band_centres = [
-            self.sensor.rsr[band_name][self.detector_name]["central_wavelength"]
-            * self.sensor.si_scale
-            / 1e-9
+            self.sensor.rsr[band_name][self.detector_name]["central_wavelength"] * self.sensor.si_scale / 1e-9
             for band_name in band_names
         ]
 
@@ -232,9 +216,7 @@ class SensorSRFUtil:
         :return: band srf wavelength coordinates
         """
 
-        srf = self.sensor.rsr[band_name][self.detector_name][
-            "response"
-        ]  # gets rsr for given band
+        srf = self.sensor.rsr[band_name][self.detector_name]["response"]  # gets rsr for given band
         wl_srf = 1000 * self.sensor.rsr[band_name][self.detector_name]["wavelength"]
         return srf, wl_srf
 
@@ -254,7 +236,6 @@ class SensorSRFUtil:
 
         # Iterate through bands
         if self.i < len(self.band_names):
-
             # Update counter
             self.i += 1
 
