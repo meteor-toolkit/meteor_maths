@@ -104,7 +104,7 @@ def repeat_f(
 
     .. note::
         Defines all function on common x coordinates, so may use a lot of memory if many bands defined with x sampling.
-        For a lower memory solution try **matheo.utils.function_def.iter_fs()**..
+        For a lower memory solution try **meteor_maths.utils.function_def.iter_fs()**..
 
     :param f: function to repeat
     :param centres: function centres
@@ -141,7 +141,7 @@ def iter_f(
     Returns iterator to evaluate repeating functions along a coordinate axis
 
     .. note::
-        Offers a lower memory solution to **matheo.utils.function_def.return_fs()**.
+        Offers a lower memory solution to **meteor_maths.utils.function_def.return_fs()**.
 
     :param f: function to repeat
     :param centres: distribution centres

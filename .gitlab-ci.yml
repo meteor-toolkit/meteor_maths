@@ -47,7 +47,7 @@ ruff-format:
   extends: .py_venv
   stage: Static Analysis
   script:
-    - ruff format --check matheo
+    - ruff format --check meteor_maths
   allow_failure: true
   needs: []
 
@@ -55,7 +55,7 @@ ruff-lint:
   extends: .py_venv
   stage: Static Analysis
   script:
-    - ruff check matheo
+    - ruff check meteor_maths
   allow_failure: true
   needs: []
 
@@ -63,7 +63,7 @@ mypy:
   extends: .py_venv
   stage: Static Analysis
   script:
-    - mypy matheo
+    - mypy meteor_maths
   allow_failure: true
   needs: []
 
@@ -79,7 +79,7 @@ mypy:
       --cov-report html:test_report/cov_report
       --cov-report xml:test_report/coverage.xml
       --junitxml=test_report/junit.xml
-      --cov=matheo
+      --cov=meteor_maths
   coverage: '/^TOTAL.+?(\d+\%)$/'
   needs: []
   artifacts:
@@ -121,8 +121,8 @@ test_report:
     name: oberonamsterdam/wkhtmltopdf
     entrypoint: [""]
   script:
-    - wkhtmltopdf --enable-local-file-access file:////builds/eco/tools/matheo/test_report/report.html test_report.pdf
-    - wkhtmltopdf --enable-local-file-access file:////builds/eco/tools/matheo/test_report/cov_report/index.html cov_report.pdf
+    - wkhtmltopdf --enable-local-file-access file:////builds/eco/tools/meteor_maths/test_report/report.html test_report.pdf
+    - wkhtmltopdf --enable-local-file-access file:////builds/eco/tools/meteor_maths/test_report/cov_report/index.html cov_report.pdf
     - mv test_report.pdf ./quality_documentation/test_report.pdf
     - mv cov_report.pdf ./quality_documentation/cov_report.pdf
   artifacts:

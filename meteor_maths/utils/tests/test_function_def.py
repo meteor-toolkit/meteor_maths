@@ -4,7 +4,7 @@ import unittest
 
 import numpy as np
 
-from matheo.utils import function_def as fd
+from meteor_maths.utils import function_def as fd
 
 __author__ = "Sam Hunt"
 __created__ = "01/08/2021"

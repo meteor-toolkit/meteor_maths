@@ -1,4 +1,4 @@
-from matheo.band_integration.band_integration import (
+from meteor_maths.band_integration.band_integration import (
     band_int,  # noqa: F401
     band_int2ax,  # noqa: F401
     band_int2d,  # noqa: F401
