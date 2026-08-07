@@ -5,14 +5,14 @@
 
 .. _userguide:
 
-Using Matheo
+Using meteor_maths
 =============
 
 Band integration
 ###################
-Band integration can be done in matheo in a number of ways, depending on the input data one wants to use.
+Band integration can be done in meteor_maths in a number of ways, depending on the input data one wants to use.
 The most general approach is to use the band_int() function, in which the user supplies the band response function(s) as numpy arrays.
-In the matheo band_integration arguments:
+In the meteor_maths band_integration arguments:
 
 * :math:`d` - the data to be band integrated
 * :math:`x` - the data coordinates
@@ -22,8 +22,8 @@ In the matheo band_integration arguments:
 In the band_int() function, these are passed as numpy arrays::
 
    import numpy as np
-   import matheo.band_integration as bi
-   from matheo.utils import function_def as fd
+   import meteor_maths.band_integration as bi
+   from meteor_maths.utils import function_def as fd
 
    x = np.arange(0, 100, 0.01)
    d = (0.02 * x) ** 3 + (-0.2 * x) ** 2 + (-3 * x) + 100
@@ -38,7 +38,7 @@ If a multidimensional response function is provided, d_band will have the
 band integrated data for all bands. Note that the f_triangle() function was used to define
 the response function. See the Utilities Section below for further information on these helper functions.
 
-Another way of performing band integration using matheo is with the pixel_int() function.
+Another way of performing band integration using meteor_maths is with the pixel_int() function.
 For this function, instead of providing the spectral response functions as numpy arrays,
 it is possible to just provide the centres, widths and shapes of the response functions, where:
 
@@ -86,16 +86,16 @@ It is also possible to propagate uncertainties through all these functions. Ther
 When any of these optional keyword are set, uncertainties are propagated using a Monte Carlo approach with 10000 iterations using `punpy <https://punpy.readthedocs.io/en/latest/>`_, which is part of the `CoMet toolkit <https://www.comet-toolkit.org/>`_.
 
 There are also a number of additional functions (such as higher dimension version of the above, e.g. the band_int2ax() function) and other optional keywords.
-For explanations on these we refer to the matheo API.
+For explanations on these we refer to the meteor_maths API.
 
 Resampling
 ###################
-Matheo also provides tools for resampling gridded data from one 2D grid onto another, e.g. when pairing up two Earth observation products defined on different grids.
+meteor_maths also provides tools for resampling gridded data from one 2D grid onto another, e.g. when pairing up two Earth observation products defined on different grids.
 
 The simplest way to do this is with the nearest_neighbour_resample() function, which averages the source pixels nearest to each target pixel::
 
    import numpy as np
-   from matheo.sampling import nearest_neighbour_resample
+   from meteor_maths.sampling import nearest_neighbour_resample
 
    x_source, y_source = np.meshgrid(np.arange(20), np.arange(20))
    data_source = np.random.random(x_source.shape)
@@ -110,14 +110,14 @@ Target pixels for which too few source pixels were available (estimated automati
 For xarray Datasets with 2, 3 or 4 dimensional variables, use the resample() function instead, which resamples a variable's x/y dimensions while looping over any other (e.g. band or time) dimensions::
 
    import xarray as xr
-   from matheo.sampling import resample
+   from meteor_maths.sampling import resample
 
    ds = xr.Dataset(data_vars=dict(var=(["y_source", "x_source"], data_source)))
    data_target = resample("var", ds, x_source, y_source, x_target, y_target)
 
 When resampling several variables that share the same source/target grids (e.g. in a loop), build a RegridCache once and reuse it, to avoid recomputing the underlying KDTree on every call::
 
-   from matheo.sampling import RegridCache
+   from meteor_maths.sampling import RegridCache
 
    cache = RegridCache(x_source, y_source, x_target, y_target)
    for var in ["var_a", "var_b"]:
@@ -128,10 +128,10 @@ When resampling several variables that share the same source/target grids (e.g. 
 Utilities
 ############
 
-There are also a number of functions defined in matheo.utils.function_def, which can be used to build response functions of a specific shape, or for other general uses.
+There are also a number of functions defined in meteor_maths.utils.function_def, which can be used to build response functions of a specific shape, or for other general uses.
 These functions include tophat, Gaussian and triangular functions, as well as utilities to make normalised and repeating functions::
 
-   from matheo.utils import function_def as fd
+   from meteor_maths.utils import function_def as fd
    import numpy as np
 
    x = np.arange(0, 11, 1)

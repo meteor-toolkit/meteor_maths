@@ -9,7 +9,7 @@ import numpy as np
 import numpy.testing
 import xarray as xr
 
-from matheo.sampling import (
+from meteor_maths.sampling import (
     RegridCache,
     Resampler,
     nearest_neighbour_resample,
@@ -96,7 +96,7 @@ class TestSampling(unittest.TestCase):
         # for a mock is how we verify that dispatch without depending on any
         # particular algorithm's internals.
         with patch.dict(
-            "matheo.sampling.sampling._RESAMPLERS",
+            "meteor_maths.sampling.sampling._RESAMPLERS",
             {"nearest_neighbour": mock_resampler_cls},
         ):
             test_proc_data = resample(
@@ -132,7 +132,7 @@ class TestSampling(unittest.TestCase):
         mock_resampler_cls = MagicMock(name="ResamplerCls")
 
         with patch.dict(
-            "matheo.sampling.sampling._RESAMPLERS",
+            "meteor_maths.sampling.sampling._RESAMPLERS",
             {"nearest_neighbour": mock_resampler_cls},
         ):
             test_proc_data = resample(
@@ -159,7 +159,7 @@ class TestSampling(unittest.TestCase):
         )
 
         with patch.dict(
-            "matheo.sampling.sampling._RESAMPLERS",
+            "meteor_maths.sampling.sampling._RESAMPLERS",
             {"nearest_neighbour": mock_resampler_cls},
         ):
             test_proc_data = resample(
@@ -198,7 +198,7 @@ class TestSampling(unittest.TestCase):
         )
 
         with patch.dict(
-            "matheo.sampling.sampling._RESAMPLERS",
+            "meteor_maths.sampling.sampling._RESAMPLERS",
             {"nearest_neighbour": mock_resampler_cls},
         ):
             test_proc_data = resample(
@@ -267,7 +267,7 @@ class TestSampling(unittest.TestCase):
         )
 
         with patch.dict(
-            "matheo.sampling.sampling._RESAMPLERS",
+            "meteor_maths.sampling.sampling._RESAMPLERS",
             {"fake_interpolation": mock_resampler_cls},
         ):
             resample(
@@ -315,7 +315,7 @@ class TestSampling(unittest.TestCase):
         # name afterwards doesn't change what's in the dict), so patch the
         # registry entry itself instead.
         with patch.dict(
-            "matheo.sampling.sampling._RESAMPLERS",
+            "meteor_maths.sampling.sampling._RESAMPLERS",
             {"nearest_neighbour": MagicMock(side_effect=AssertionError)},
         ):
             result_a = resample("var_a", ds, x_source, y_source, x_target, y_target, resampler=cache)

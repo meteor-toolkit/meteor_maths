@@ -8,13 +8,13 @@ from collections.abc import Callable, Iterable
 import numpy as np
 from comet_maths import interpolate_1d
 
-from matheo.band_integration.srf_utils import (
+from meteor_maths.band_integration.srf_utils import (
     return_band_centres,
     return_band_names,
     return_iter_srf,
 )
-from matheo.utils.function_def import f_gaussian, f_tophat, f_triangle, iter_f
-from matheo.utils.punpy_util import func_with_unc
+from meteor_maths.utils.function_def import f_gaussian, f_tophat, f_triangle, iter_f
+from meteor_maths.utils.punpy_util import func_with_unc
 
 __author__ = "Sam Hunt"
 __created__ = "30/7/2021"

@@ -1,2 +1,2 @@
 include versioneer.py
-include matheo/_version.py
+include meteor_maths/_version.py

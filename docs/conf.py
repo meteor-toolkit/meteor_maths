@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# matheo documentation build configuration file, created by
+# meteor_maths documentation build configuration file, created by
 # cookiecutter
 #
 # This file is execfile()d with the current directory set to its
@@ -23,12 +23,12 @@ import os
 from importlib.metadata import PackageNotFoundError, version as _get_version
 
 sys.path.insert(0, os.path.abspath(".."))
-import matheo
+import meteor_maths
 
 try:
-    _pkg_version = _get_version("matheo")
+    _pkg_version = _get_version("meteor_maths")
 except PackageNotFoundError:
-    _pkg_version = matheo.__version__
+    _pkg_version = meteor_maths.__version__
 
 # SH added to run apidoc on build
 this_directory = os.path.dirname(__file__)
@@ -48,7 +48,7 @@ def run_apidoc(_):
         "-M",
         "-o",
         os.path.join(this_directory, "content", "api"),
-        matheo.__path__[0],
+        meteor_maths.__path__[0],
     ] + ignore_paths
 
     try:
@@ -68,7 +68,7 @@ def setup(app):
     app.connect("builder-inited", run_apidoc)
 
 
-project_title = "matheo".replace("_", " ").title()
+project_title = "meteor_maths".replace("_", " ").title()
 
 # -- General configuration ---------------------------------------------
 
@@ -152,8 +152,8 @@ html_theme = "sphinx_book_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
-html_logo = "matheo_name.png"
-html_title = "matheo"
+html_logo = "meteor_maths_name.png"
+html_title = "meteor_maths"
 
 # # Sam Hunt added to override wide tables in RTD theme
 # html_context = {
@@ -165,7 +165,7 @@ html_title = "matheo"
 # -- Options for HTMLHelp output ---------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "matheodoc"
+htmlhelp_basename = "meteor_mathsdoc"
 
 
 # -- Options for LaTeX output ------------------------------------------
@@ -203,7 +203,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "matheo", "matheo Documentation", [author], 1)]
+man_pages = [(master_doc, "meteor_maths", "meteor_maths Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------
@@ -214,10 +214,10 @@ man_pages = [(master_doc, "matheo", "matheo Documentation", [author], 1)]
 texinfo_documents = [
     (
         master_doc,
-        "matheo",
-        "matheo Documentation",
+        "meteor_maths",
+        "meteor_maths Documentation",
         author,
-        "matheo",
+        "meteor_maths",
         "Data readers and preprocessing for satellite data",
         "Miscellaneous",
     ),

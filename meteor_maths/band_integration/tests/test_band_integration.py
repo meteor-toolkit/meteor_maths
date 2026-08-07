@@ -8,8 +8,8 @@ from unittest.mock import call, patch
 import numpy as np
 import numpy.testing
 
-from matheo.band_integration import band_integration as bi
-from matheo.utils import function_def as fd
+from meteor_maths.band_integration import band_integration as bi
+from meteor_maths.utils import function_def as fd
 
 """___Authorship___"""
 __author__ = "Sam Hunt"
@@ -415,7 +415,7 @@ class TestBandIntegrate(unittest.TestCase):
 
         np.testing.assert_array_equal(d_int, d_int_expected)
 
-    @patch("matheo.band_integration.band_integration._band_int_regular_grid")
+    @patch("meteor_maths.band_integration.band_integration._band_int_regular_grid")
     def test__band_int_arr_regular_grid(self, mock):
         x = np.arange(4)
         x_r = np.arange(4)
@@ -423,7 +423,7 @@ class TestBandIntegrate(unittest.TestCase):
 
         mock.assert_called_once_with("d", x, "r", d_axis_x=2)
 
-    @patch("matheo.band_integration.band_integration._band_int", wraps=fake__band_int)
+    @patch("meteor_maths.band_integration.band_integration._band_int", wraps=fake__band_int)
     def test_band_int_arr_r1d_d1d(self, mock):
         d = np.zeros(5)
         x = np.arange(5)
@@ -441,7 +441,7 @@ class TestBandIntegrate(unittest.TestCase):
         np.testing.assert_array_equal(mock.call_args_list[0][1]["r"], r)
         np.testing.assert_array_equal(mock.call_args_list[0][1]["x_r"], x_r)
 
-    @patch("matheo.band_integration.band_integration._band_int", wraps=fake__band_int)
+    @patch("meteor_maths.band_integration.band_integration._band_int", wraps=fake__band_int)
     def test_band_int_arr_r1d_d3d(self, mock):
 
         d = np.zeros((3, 4, 5))
@@ -468,7 +468,7 @@ class TestBandIntegrate(unittest.TestCase):
             np.testing.assert_array_equal(real_kwargs["r"], expected_kwargs["r"])
             np.testing.assert_array_equal(real_kwargs["x_r"], expected_kwargs["x_r"])
 
-    @patch("matheo.band_integration.band_integration._band_int", wraps=fake__band_int)
+    @patch("meteor_maths.band_integration.band_integration._band_int", wraps=fake__band_int)
     def test_band_int_arr_r2d_d1d(self, mock):
         d = np.zeros(5)
         x = np.arange(5)
@@ -499,7 +499,7 @@ class TestBandIntegrate(unittest.TestCase):
             np.testing.assert_array_equal(real_kwargs["r"], expected_kwargs["r"])
             np.testing.assert_array_equal(real_kwargs["x_r"], expected_kwargs["x_r"])
 
-    @patch("matheo.band_integration.band_integration._band_int", wraps=fake__band_int)
+    @patch("meteor_maths.band_integration.band_integration._band_int", wraps=fake__band_int)
     def test_band_int_arr_r2d_d3d(self, mock):
         d = np.zeros((3, 4, 5))
         x = np.arange(5)
@@ -532,7 +532,7 @@ class TestBandIntegrate(unittest.TestCase):
             np.testing.assert_array_equal(real_kwargs["r"], expected_kwargs["r"])
             np.testing.assert_array_equal(real_kwargs["x_r"], expected_kwargs["x_r"])
 
-    @patch("matheo.band_integration.band_integration._band_int", wraps=fake__band_int)
+    @patch("meteor_maths.band_integration.band_integration._band_int", wraps=fake__band_int)
     def test_band_int2ax_arr(self, mock):
 
         d = np.zeros((3, 4, 5))
@@ -565,7 +565,7 @@ class TestBandIntegrate(unittest.TestCase):
             np.testing.assert_array_equal(real_kwargs["r"], expected_kwargs["r"])
             np.testing.assert_array_equal(real_kwargs["x_r"], expected_kwargs["x_r"])
 
-    @patch("matheo.band_integration.band_integration._band_int", wraps=fake__band_int)
+    @patch("meteor_maths.band_integration.band_integration._band_int", wraps=fake__band_int)
     def test_band_int3ax_arr(self, mock):
 
         d = np.zeros((3, 4, 5))
@@ -603,7 +603,7 @@ class TestBandIntegrate(unittest.TestCase):
             np.testing.assert_array_equal(real_kwargs["r"], expected_kwargs["r"])
             np.testing.assert_array_equal(real_kwargs["x_r"], expected_kwargs["x_r"])
 
-    @patch("matheo.band_integration.band_integration.band_int", wraps=fake_band_int)
+    @patch("meteor_maths.band_integration.band_integration.band_int", wraps=fake_band_int)
     def test_iter_band_int(self, mock):
         d = np.zeros((3, 4, 11))
         x = np.arange(11)
@@ -627,7 +627,7 @@ class TestBandIntegrate(unittest.TestCase):
             np.testing.assert_array_equal(real_call[0][3], expected_call[1][3])
             self.assertEqual(real_call[0][4], expected_call[1][4])
 
-    @patch("matheo.band_integration.band_integration.band_int", wraps=fake_band_int)
+    @patch("meteor_maths.band_integration.band_integration.band_int", wraps=fake_band_int)
     def test_spectral_band_int_sensor(self, mock):
         d = np.zeros((3, 4, 11))
         wl = np.arange(400, 510, 10)
@@ -842,8 +842,8 @@ class TestBandIntegrate(unittest.TestCase):
 
         np.testing.assert_array_almost_equal(wl_band, expected_wl_band, decimal=1)
 
-    @patch("matheo.band_integration.band_integration.return_r_pixel")
-    @patch("matheo.band_integration.band_integration.band_int")
+    @patch("meteor_maths.band_integration.band_integration.return_r_pixel")
+    @patch("meteor_maths.band_integration.band_integration.band_int")
     def test_pixel_int(self, mock_bi, mock_rrp):
         d = np.zeros(12)
         x = np.arange(12)
@@ -855,8 +855,8 @@ class TestBandIntegrate(unittest.TestCase):
 
         mock_bi.assert_called_once_with(d=d, x=x, r=mock_rrp.return_value, x_r=x, d_axis_x=d_axis_x)
 
-    @patch("matheo.band_integration.band_integration.return_r_pixel")
-    @patch("matheo.band_integration.band_integration.band_int")
+    @patch("meteor_maths.band_integration.band_integration.return_r_pixel")
+    @patch("meteor_maths.band_integration.band_integration.band_int")
     def test_pixel_int_r_sampling_called(self, mock_bi, mock_rrp):
         d = np.zeros(12)
         x = np.arange(12)
@@ -868,8 +868,8 @@ class TestBandIntegrate(unittest.TestCase):
 
         mock_bi.assert_called_once_with(d=d, x=x, r=mock_rrp.return_value, x_r=x, d_axis_x=d_axis_x)
 
-    @patch("matheo.band_integration.band_integration.return_r_pixel")
-    @patch("matheo.band_integration.band_integration.band_int")
+    @patch("meteor_maths.band_integration.band_integration.return_r_pixel")
+    @patch("meteor_maths.band_integration.band_integration.band_int")
     def test_pixel_int_r_sampling(self, mock_bi, mock_rrp):
         d = np.zeros(12)
         x = np.arange(12)
@@ -895,7 +895,7 @@ class TestBandIntegrate(unittest.TestCase):
         np.testing.assert_array_almost_equal(mock_bi.call_args[1]["x_r"], x_r)
         self.assertEqual(mock_bi.call_args[1]["d_axis_x"], d_axis_x)
 
-    @patch("matheo.band_integration.band_integration.band_int", wraps=fake_band_int)
+    @patch("meteor_maths.band_integration.band_integration.band_int", wraps=fake_band_int)
     def test_pixel_int_eval_iter(self, mock):
         d = np.zeros((3, 4, 11))
         x = np.arange(11)

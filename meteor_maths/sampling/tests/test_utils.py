@@ -1,10 +1,10 @@
-"""Tests for matheo.sampling.utils module"""
+"""Tests for meteor_maths.sampling.utils module"""
 
 import unittest
 
 import numpy as np
 
-import matheo.sampling.utils as util
+import meteor_maths.sampling.utils as util
 
 
 class TestUtils(unittest.TestCase):
