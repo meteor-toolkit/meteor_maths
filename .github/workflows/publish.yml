@@ -40,7 +40,7 @@ jobs:
         run: |
           echo -e "machine gitlab.npl.co.uk\nlogin gitlab-ci-token\npassword ${{ secrets.NPL_GITLAB_TOKEN }}" >> ~/.netrc
       - run: pip install -e ".[dev]"
-      - run: pytest --cov=matheo
+      - run: pytest --cov=meteor_maths
 
   # -----------------------------------------------------------------------
   # Build source distribution and wheel.
@@ -75,7 +75,7 @@ jobs:
   # One-time setup required in the PyPI project settings:
   #   Publisher:  GitHub Actions
   #   Owner:      <your-github-org>
-  #   Repository: matheo
+  #   Repository: meteor_maths
   #   Workflow:   publish.yml
   # -----------------------------------------------------------------------
   publish:
@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/matheo
+      url: https://pypi.org/p/meteor_maths
     permissions:
       id-token: write  # required for OIDC trusted publishing
 

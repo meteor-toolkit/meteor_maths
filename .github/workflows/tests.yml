@@ -47,7 +47,7 @@ jobs:
             --cov-report html:test_report/cov_report \
             --cov-report xml:test_report/coverage.xml \
             --junitxml=test_report/junit.xml \
-            --cov=matheo
+            --cov=meteor_maths
 
       - name: Upload test report
         if: always()
@@ -75,8 +75,8 @@ jobs:
           cache: pip
       - run: pip install -e ".[dev]"
       - name: ruff format
-        run: ruff format --check matheo
+        run: ruff format --check meteor_maths
       - name: ruff lint
-        run: ruff check matheo
+        run: ruff check meteor_maths
       - name: mypy
-        run: mypy matheo
+        run: mypy meteor_maths
