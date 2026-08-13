@@ -564,8 +564,12 @@ def resample(
         resampler = resampler_cls(x_source, y_source, x_target, y_target)
 
     # create empty array for the processed data
-    x_dim = [dim for dim in ds[var].dims if re.search("^x_", dim)][0]
-    y_dim = [dim for dim in ds[var].dims if re.search("^y_", dim)][0]
+    # matches a dim literally named "x"/"y", or one with an "x_"/"y_" prefix (e.g.
+    # "x_10m", to disambiguate multiple grids in the same dataset) -- previously
+    # only the prefixed form matched, forcing callers with plain "x"/"y" dims to
+    # rename them just to satisfy this lookup.
+    x_dim = [dim for dim in ds[var].dims if re.search("^x(_|$)", dim)][0]
+    y_dim = [dim for dim in ds[var].dims if re.search("^y(_|$)", dim)][0]
     x_dim_idx = ds[var].dims.index(x_dim)
     y_dim_idx = ds[var].dims.index(y_dim)
     shape = list(ds[var].values.shape)
