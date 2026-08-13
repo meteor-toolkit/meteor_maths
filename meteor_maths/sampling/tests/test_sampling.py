@@ -373,9 +373,9 @@ class TestSampling(unittest.TestCase):
             np.ones(self.test_ds.coord1_target.shape, dtype=bool),
         )
         ds = xr.Dataset(
-            data_vars=dict(
-                data_2d=(["x", "y"], self.test_ds["data_2d_source"].values),
-            )
+            data_vars={
+                "data_2d": (["x", "y"], self.test_ds["data_2d_source"].values)
+            }
         )
 
         with patch.dict(

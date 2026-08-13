@@ -541,8 +541,8 @@ def resample(
     # "x_10m", to disambiguate multiple grids in the same dataset) -- previously
     # only the prefixed form matched, forcing callers with plain "x"/"y" dims to
     # rename them just to satisfy this lookup.
-    x_dim = [dim for dim in ds[var].dims if re.search("^x(_|$)", str(dim))][0]
-    y_dim = [dim for dim in ds[var].dims if re.search("^y(_|$)", str(dim))][0]
+    x_dim = next(dim for dim in ds[var].dims if re.search("^x(_|$)", str(dim)))
+    y_dim = next(dim for dim in ds[var].dims if re.search("^y(_|$)", str(dim)))
     x_dim_idx = ds[var].dims.index(x_dim)
     y_dim_idx = ds[var].dims.index(y_dim)
     shape = list(ds[var].values.shape)
