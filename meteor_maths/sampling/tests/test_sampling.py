@@ -361,6 +361,39 @@ class TestSampling(unittest.TestCase):
         np.testing.assert_array_almost_equal(result[0], expected_band0)
         np.testing.assert_array_almost_equal(result[1], expected_band0 * 2)
 
+    def test_resample_2d_with_plain_x_y_dims(self):
+        """Regression test: x_dim/y_dim lookup used to require an "x_"/"y_" prefix
+        (e.g. "x_source"), so a variable with plain "x"/"y" dims raised IndexError
+        from the empty match list, forcing callers to rename their dims just to
+        satisfy this lookup."""
+        mock_resampler_cls = MagicMock(name="ResamplerCls")
+        mock_resampler = mock_resampler_cls.return_value
+        mock_resampler.regrid.return_value = (
+            np.ones(self.test_ds.coord1_target.shape),
+            np.ones(self.test_ds.coord1_target.shape, dtype=bool),
+        )
+        ds = xr.Dataset(
+            data_vars=dict(
+                data_2d=(["x", "y"], self.test_ds["data_2d_source"].values),
+            )
+        )
+
+        with patch.dict(
+            "meteor_maths.sampling.sampling._RESAMPLERS",
+            {"nearest_neighbour": mock_resampler_cls},
+        ):
+            test_proc_data = resample(
+                "data_2d",
+                ds,
+                x_source=self.test_ds.coord1_source.values,
+                y_source=self.test_ds.coord2_source.values,
+                x_target=self.test_ds.coord1_target.values,
+                y_target=self.test_ds.coord2_target.values,
+                mask_invalid=False,
+            )
+
+        np.testing.assert_array_equal(test_proc_data.shape, self.test_ds.coord1_target.shape)
+
     def test_nearest_neighbour_resample(self):
         data_source = np.vstack([np.arange(15) for i in range(18)])
         x_source, y_source = np.meshgrid(np.arange(15), np.arange(18))
