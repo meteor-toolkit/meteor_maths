@@ -379,7 +379,7 @@ class TestSampling(unittest.TestCase):
         )
 
         with patch.dict(
-            "matheo.sampling.sampling._RESAMPLERS",
+            "meteor_maths.sampling.sampling._RESAMPLERS",
             {"nearest_neighbour": mock_resampler_cls},
         ):
             test_proc_data = resample(
@@ -392,9 +392,7 @@ class TestSampling(unittest.TestCase):
                 mask_invalid=False,
             )
 
-        np.testing.assert_array_equal(
-            test_proc_data.shape, self.test_ds.coord1_target.shape
-        )
+        np.testing.assert_array_equal(test_proc_data.shape, self.test_ds.coord1_target.shape)
 
     def test_nearest_neighbour_resample(self):
         data_source = np.vstack([np.arange(15) for i in range(18)])
