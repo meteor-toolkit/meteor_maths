@@ -2,18 +2,18 @@
 Tests for sampling module
 """
 
-import numpy.testing
-
 import unittest
 from unittest.mock import MagicMock, patch
+
 import numpy as np
+import numpy.testing
 import xarray as xr
 
-from matheo.sampling import (
-    resample,
-    nearest_neighbour_resample,
-    Resampler,
+from meteor_maths.sampling import (
     RegridCache,
+    Resampler,
+    nearest_neighbour_resample,
+    resample,
 )
 
 __author__ = "Maddie Stedman"
@@ -28,11 +28,11 @@ class TestSampling(unittest.TestCase):
             "x_target": 8,
             "y_target": 8,
         }
-        fv = 9.969209968386869e36
+        _ = 9.969209968386869e36
 
         test_ds = xr.Dataset(
-            data_vars=dict(
-                data_3d_source=(
+            data_vars={
+                "data_3d_source": (
                     ["bands", "x_source", "y_source"],
                     np.ones(
                         (
@@ -42,7 +42,7 @@ class TestSampling(unittest.TestCase):
                         )
                     ),
                 ),
-                data_3d_target=(
+                "data_3d_target": (
                     ["bands", "x_target", "y_target"],
                     np.ones(
                         (
@@ -52,7 +52,7 @@ class TestSampling(unittest.TestCase):
                         )
                     ),
                 ),
-                data_2d_source=(
+                "data_2d_source": (
                     ["x_source", "y_source"],
                     np.ones(
                         (
@@ -61,23 +61,23 @@ class TestSampling(unittest.TestCase):
                         )
                     ),
                 ),
-                coord1_source=(
+                "coord1_source": (
                     ["x_source", "y_source"],
                     np.ones((size_dict["x_source"], size_dict["y_source"])),
                 ),
-                coord2_source=(
+                "coord2_source": (
                     ["x_source", "y_source"],
                     2 * np.ones((size_dict["x_source"], size_dict["y_source"])),
                 ),
-                coord1_target=(
+                "coord1_target": (
                     ["x_target", "y_target"],
                     np.ones((size_dict["x_target"], size_dict["y_target"])),
                 ),
-                coord2_target=(
+                "coord2_target": (
                     ["x_target", "y_target"],
                     2 * np.ones((size_dict["x_target"], size_dict["y_target"])),
                 ),
-            ),
+            },
         )
 
         self.test_ds = test_ds
@@ -96,7 +96,7 @@ class TestSampling(unittest.TestCase):
         # for a mock is how we verify that dispatch without depending on any
         # particular algorithm's internals.
         with patch.dict(
-            "matheo.sampling.sampling._RESAMPLERS",
+            "meteor_maths.sampling.sampling._RESAMPLERS",
             {"nearest_neighbour": mock_resampler_cls},
         ):
             test_proc_data = resample(
@@ -123,20 +123,16 @@ class TestSampling(unittest.TestCase):
         # freshly-computed .T view won't match even when equal.
         mock_resampler.regrid.assert_called_once()
         call_args, call_kwargs = mock_resampler.regrid.call_args
-        np.testing.assert_array_equal(
-            call_args[0], self.test_ds["data_2d_source"].values.T
-        )
+        np.testing.assert_array_equal(call_args[0], self.test_ds["data_2d_source"].values.T)
         self.assertEqual(call_kwargs, {"mask_invalid": False})
 
-        np.testing.assert_array_equal(
-            test_proc_data.shape, self.test_ds.coord1_target.shape
-        )
+        np.testing.assert_array_equal(test_proc_data.shape, self.test_ds.coord1_target.shape)
 
     def test_resample_2d_same_grid(self):
         mock_resampler_cls = MagicMock(name="ResamplerCls")
 
         with patch.dict(
-            "matheo.sampling.sampling._RESAMPLERS",
+            "meteor_maths.sampling.sampling._RESAMPLERS",
             {"nearest_neighbour": mock_resampler_cls},
         ):
             test_proc_data = resample(
@@ -163,7 +159,7 @@ class TestSampling(unittest.TestCase):
         )
 
         with patch.dict(
-            "matheo.sampling.sampling._RESAMPLERS",
+            "meteor_maths.sampling.sampling._RESAMPLERS",
             {"nearest_neighbour": mock_resampler_cls},
         ):
             test_proc_data = resample(
@@ -188,9 +184,7 @@ class TestSampling(unittest.TestCase):
             # data_3d_source's dims are ordered [bands, x_source, y_source],
             # so each band's 2D slice is transposed before being handed to
             # the resampler (see the "transpose_xy" comment in resample())
-            np.testing.assert_array_equal(
-                band_call[0][0], self.test_ds["data_3d_source"].values[0].T
-            )
+            np.testing.assert_array_equal(band_call[0][0], self.test_ds["data_3d_source"].values[0].T)
             self.assertEqual(band_call[1]["mask_invalid"], False)
 
         np.testing.assert_array_equal(test_proc_data.shape, (4, 8, 8))
@@ -204,7 +198,7 @@ class TestSampling(unittest.TestCase):
         )
 
         with patch.dict(
-            "matheo.sampling.sampling._RESAMPLERS",
+            "meteor_maths.sampling.sampling._RESAMPLERS",
             {"nearest_neighbour": mock_resampler_cls},
         ):
             test_proc_data = resample(
@@ -273,7 +267,7 @@ class TestSampling(unittest.TestCase):
         )
 
         with patch.dict(
-            "matheo.sampling.sampling._RESAMPLERS",
+            "meteor_maths.sampling.sampling._RESAMPLERS",
             {"fake_interpolation": mock_resampler_cls},
         ):
             resample(
@@ -304,16 +298,12 @@ class TestSampling(unittest.TestCase):
         about every algorithm's own knobs."""
         x_source, y_source = np.meshgrid(np.arange(15), np.arange(18))
         x_target = np.array([[1.0, 4.0, 7.0, 10.0, 13.0]] * 6)
-        y_target = np.array(
-            [[1.0] * 5, [4.0] * 5, [7.0] * 5, [10.0] * 5, [13.0] * 5, [16.0] * 5]
-        )
+        y_target = np.array([[1.0] * 5, [4.0] * 5, [7.0] * 5, [10.0] * 5, [13.0] * 5, [16.0] * 5])
         ds = xr.Dataset(
-            data_vars=dict(
-                # dims ordered [y_source, x_source] to match the array shape
-                # (18, 15) produced by meshgrid(arange(15), arange(18)) above
-                var_a=(["y_source", "x_source"], np.vstack([np.arange(15)] * 18)),
-                var_b=(["y_source", "x_source"], np.vstack([np.arange(15)] * 18) * 2),
-            )
+            data_vars={
+                "var_a": (["y_source", "x_source"], np.vstack([np.arange(15)] * 18)),
+                "var_b": (["y_source", "x_source"], np.vstack([np.arange(15)] * 18) * 2),
+            }
         )
 
         cache = RegridCache(x_source, y_source, x_target, y_target)
@@ -325,15 +315,11 @@ class TestSampling(unittest.TestCase):
         # name afterwards doesn't change what's in the dict), so patch the
         # registry entry itself instead.
         with patch.dict(
-            "matheo.sampling.sampling._RESAMPLERS",
+            "meteor_maths.sampling.sampling._RESAMPLERS",
             {"nearest_neighbour": MagicMock(side_effect=AssertionError)},
         ):
-            result_a = resample(
-                "var_a", ds, x_source, y_source, x_target, y_target, resampler=cache
-            )
-            result_b = resample(
-                "var_b", ds, x_source, y_source, x_target, y_target, resampler=cache
-            )
+            result_a = resample("var_a", ds, x_source, y_source, x_target, y_target, resampler=cache)
+            result_b = resample("var_b", ds, x_source, y_source, x_target, y_target, resampler=cache)
 
         expected_a, _ = cache.regrid(ds["var_a"].values)
         expected_b, _ = cache.regrid(ds["var_b"].values)
@@ -351,21 +337,19 @@ class TestSampling(unittest.TestCase):
         array follows the dims' own [x, y] order)."""
         x_source, y_source = np.meshgrid(np.arange(15), np.arange(18))
         x_target = np.array([[1.0, 4.0, 7.0, 10.0, 13.0]] * 6)
-        y_target = np.array(
-            [[1.0] * 5, [4.0] * 5, [7.0] * 5, [10.0] * 5, [13.0] * 5, [16.0] * 5]
-        )
+        y_target = np.array([[1.0] * 5, [4.0] * 5, [7.0] * 5, [10.0] * 5, [13.0] * 5, [16.0] * 5])
 
         # (18, 15), matching x_source/y_source's own (y, x) shape
         base = np.vstack([np.arange(15)] * 18).astype(float)
         # deliberately transposed to (15, 18), to match dims=[x_source, y_source]
         data_2d = base.T
         ds = xr.Dataset(
-            data_vars=dict(
-                var3d=(
+            data_vars={
+                "var3d": (
                     ["bands", "x_source", "y_source"],
                     np.stack([data_2d, data_2d * 2]),
                 ),
-            )
+            }
         )
 
         result = resample("var3d", ds, x_source, y_source, x_target, y_target)
@@ -638,9 +622,7 @@ class TestRegridCache(unittest.TestCase):
         dispatch to be able to use it like any other resampling backend."""
         x_source, y_source = np.meshgrid(np.arange(15), np.arange(18))
         x_target = np.array([[1.0, 4.0, 7.0, 10.0, 13.0]] * 6)
-        y_target = np.array(
-            [[1.0] * 5, [4.0] * 5, [7.0] * 5, [10.0] * 5, [13.0] * 5, [16.0] * 5]
-        )
+        y_target = np.array([[1.0] * 5, [4.0] * 5, [7.0] * 5, [10.0] * 5, [13.0] * 5, [16.0] * 5])
         cache = RegridCache(x_source, y_source, x_target, y_target)
         self.assertIsInstance(cache, Resampler)
 
@@ -648,16 +630,12 @@ class TestRegridCache(unittest.TestCase):
         data_source = np.vstack([np.arange(15) for i in range(18)])
         x_source, y_source = np.meshgrid(np.arange(15), np.arange(18))
         x_target = np.array([[1.0, 4.0, 7.0, 10.0, 13.0]] * 6)
-        y_target = np.array(
-            [[1.0] * 5, [4.0] * 5, [7.0] * 5, [10.0] * 5, [13.0] * 5, [16.0] * 5]
-        )
+        y_target = np.array([[1.0] * 5, [4.0] * 5, [7.0] * 5, [10.0] * 5, [13.0] * 5, [16.0] * 5])
 
         cache = RegridCache(x_source, y_source, x_target, y_target)
         data_target, mask = cache.regrid(data_source)
 
-        expected, _ = nearest_neighbour_resample(
-            data_source, x_source, y_source, x_target, y_target
-        )
+        expected, _ = nearest_neighbour_resample(data_source, x_source, y_source, x_target, y_target)
         np.testing.assert_array_almost_equal(data_target, expected)
         self.assertTrue(np.all(mask))
 
@@ -667,9 +645,7 @@ class TestRegridCache(unittest.TestCase):
         rebuilding the KDTree for every field."""
         x_source, y_source = np.meshgrid(np.arange(15), np.arange(18))
         x_target = np.array([[1.0, 4.0, 7.0, 10.0, 13.0]] * 6)
-        y_target = np.array(
-            [[1.0] * 5, [4.0] * 5, [7.0] * 5, [10.0] * 5, [13.0] * 5, [16.0] * 5]
-        )
+        y_target = np.array([[1.0] * 5, [4.0] * 5, [7.0] * 5, [10.0] * 5, [13.0] * 5, [16.0] * 5])
         rng = np.random.default_rng(0)
         fields = [rng.random(x_source.shape) for _ in range(3)]
 
@@ -677,7 +653,7 @@ class TestRegridCache(unittest.TestCase):
         # n_min_source is computed lazily on first access (it needs its own
         # KDTree query); force that here so the patch below only guards
         # against *further* KDTree construction while reusing the cache
-        cache.n_min_source
+        _ = cache.n_min_source
 
         # the cache's trees were already built above; regridding the three
         # fields below must not need to construct any new ones
@@ -685,9 +661,7 @@ class TestRegridCache(unittest.TestCase):
             results = [cache.regrid(field)[0] for field in fields]
 
         for field, result in zip(fields, results):
-            expected, _ = nearest_neighbour_resample(
-                field, x_source, y_source, x_target, y_target
-            )
+            expected, _ = nearest_neighbour_resample(field, x_source, y_source, x_target, y_target)
             np.testing.assert_array_almost_equal(result, expected)
 
     def test_regrid_with_cache_nans_excluded_from_average_not_propagated(self):
@@ -755,9 +729,7 @@ class TestRegridCache(unittest.TestCase):
             expect_valid = valid_values.size >= n_min_source[bin_idx]
             self.assertEqual(mask_flat[bin_idx], expect_valid, f"bin {bin_idx}")
             if expect_valid:
-                self.assertAlmostEqual(
-                    data_target_flat[bin_idx], valid_values.mean(), places=6
-                )
+                self.assertAlmostEqual(data_target_flat[bin_idx], valid_values.mean(), places=6)
             else:
                 self.assertTrue(np.isnan(data_target_flat[bin_idx]))
 
@@ -807,9 +779,7 @@ class TestRegridCache(unittest.TestCase):
         data_source = np.vstack([np.arange(16) for i in range(17)])
         x_source, y_source = np.meshgrid(np.arange(16), np.arange(17))
         x_target = np.array([[1.0, 4.0, 7.0, 10.0, 18.0]] * 6)
-        y_target = np.array(
-            [[1.0] * 5, [4.0] * 5, [7.0] * 5, [10.0] * 5, [13.0] * 5, [16.0] * 5]
-        )
+        y_target = np.array([[1.0] * 5, [4.0] * 5, [7.0] * 5, [10.0] * 5, [13.0] * 5, [16.0] * 5])
 
         cache = RegridCache(x_source, y_source, x_target, y_target)
         data_target, mask = cache.regrid(data_source)
@@ -851,9 +821,7 @@ class TestRegridCache(unittest.TestCase):
             values = data_in_range[cache.idx == bin_idx]
             valid_values = values[~np.isnan(values)]
             expect_valid = valid_values.size >= n_min_source[bin_idx]
-            self.assertEqual(
-                bool(mask_flat[bin_idx]), bool(expect_valid), f"bin {bin_idx}"
-            )
+            self.assertEqual(bool(mask_flat[bin_idx]), bool(expect_valid), f"bin {bin_idx}")
 
     def test_regrid_with_cache_co_rotated_grids_match_unrotated_baseline(self):
         """Rotating source and target together is just a coordinate change -
@@ -873,9 +841,7 @@ class TestRegridCache(unittest.TestCase):
         data_source = np.vstack([np.arange(16) for i in range(17)])
         x_source, y_source = np.meshgrid(np.arange(16), np.arange(17))
         x_target = np.array([[1.0, 4.0, 7.0, 10.0, 13.0]] * 6)
-        y_target = np.array(
-            [[1.0] * 5, [4.0] * 5, [7.0] * 5, [10.0] * 5, [13.0] * 5, [16.0] * 5]
-        )
+        y_target = np.array([[1.0] * 5, [4.0] * 5, [7.0] * 5, [10.0] * 5, [13.0] * 5, [16.0] * 5])
 
         cache_base = RegridCache(x_source, y_source, x_target, y_target)
         data_base, mask_base = cache_base.regrid(data_source)
@@ -889,9 +855,7 @@ class TestRegridCache(unittest.TestCase):
                 x_source_rot, y_source_rot = self._rotate(x_source, y_source, degrees)
                 x_target_rot, y_target_rot = self._rotate(x_target, y_target, degrees)
 
-                cache_rot = RegridCache(
-                    x_source_rot, y_source_rot, x_target_rot, y_target_rot
-                )
+                cache_rot = RegridCache(x_source_rot, y_source_rot, x_target_rot, y_target_rot)
                 data_rot, mask_rot = cache_rot.regrid(data_source)
 
                 np.testing.assert_array_equal(mask_rot, mask_base)
@@ -924,9 +888,7 @@ class TestRegridCache(unittest.TestCase):
                 x_source_rot, y_source_rot = self._rotate(x_source, y_source, degrees)
                 x_target_rot, y_target_rot = self._rotate(x_target, y_target, degrees)
 
-                cache_rot = RegridCache(
-                    x_source_rot, y_source_rot, x_target_rot, y_target_rot
-                )
+                cache_rot = RegridCache(x_source_rot, y_source_rot, x_target_rot, y_target_rot)
                 data_rot, mask_rot = cache_rot.regrid(data_source)
 
                 np.testing.assert_array_equal(mask_rot, mask_base)
@@ -974,16 +936,12 @@ class TestRegridCache(unittest.TestCase):
                 # target swath at a *different* absolute angle - only their
                 # difference (relative_angle) is held fixed across cases
                 x_source_i, y_source_i = self._rotate(x_source, y_source, source_angle)
-                x_target_i, y_target_i = self._rotate(
-                    x_target, y_target, source_angle + relative_angle
-                )
+                x_target_i, y_target_i = self._rotate(x_target, y_target, source_angle + relative_angle)
 
                 cache = RegridCache(x_source_i, y_source_i, x_target_i, y_target_i)
                 data_target, mask = cache.regrid(data_source)
 
-                self._assert_mask_matches_source_in_range_counts(
-                    cache, data_source, mask
-                )
+                self._assert_mask_matches_source_in_range_counts(cache, data_source, mask)
                 np.testing.assert_array_equal(mask, mask_ref)
                 np.testing.assert_array_almost_equal(data_target, data_ref)
 
@@ -1055,9 +1013,7 @@ class TestRegridCache(unittest.TestCase):
         rather than e.g. masking everything or nothing regardless of angle."""
         data_source = np.vstack([np.arange(16) for _ in range(17)])
         x_source, y_source = np.meshgrid(np.arange(16), np.arange(17))
-        x_target, y_target = np.meshgrid(
-            [1.0, 4.0, 7.0, 10.0, 13.0], [1.0, 4.0, 7.0, 10.0, 13.0, 16.0]
-        )
+        x_target, y_target = np.meshgrid([1.0, 4.0, 7.0, 10.0, 13.0], [1.0, 4.0, 7.0, 10.0, 13.0, 16.0])
 
         valid_fractions = {}
         for degrees in [0, 5, 10, 20, 45, 60]:
@@ -1075,9 +1031,7 @@ class TestRegridCache(unittest.TestCase):
                     self.assertTrue(np.all(valid >= data_source.min()))
                     self.assertTrue(np.all(valid <= data_source.max()))
 
-                self._assert_mask_matches_source_in_range_counts(
-                    cache, data_source, mask
-                )
+                self._assert_mask_matches_source_in_range_counts(cache, data_source, mask)
 
                 valid_fractions[degrees] = mask.mean()
 
@@ -1121,9 +1075,7 @@ class TestRegridCache(unittest.TestCase):
         # the cheap regular_grid=True path uses one grid-wide density and so
         # is calibrated to whichever half dominates the grid-wide estimate -
         # here that miscalibrates it badly enough to reject an entire half
-        cache_regular = RegridCache(
-            x_source, y_source, x_target, y_target, regular_grid=True
-        )
+        cache_regular = RegridCache(x_source, y_source, x_target, y_target, regular_grid=True)
         _, mask_regular = cache_regular.regrid(data_source)
         sparse_half_regular = mask_regular[:, n_cols // 2 :]
         self.assertLess(sparse_half_regular.mean(), 0.5)
@@ -1136,16 +1088,12 @@ class TestRegridCache(unittest.TestCase):
         data_source = np.vstack([np.arange(15) for i in range(18)])
         x_source, y_source = np.meshgrid(np.arange(15), np.arange(18))
         x_target = np.array([[1.0, 4.0, 7.0, 10.0, 13.0]] * 6)
-        y_target = np.array(
-            [[1.0] * 5, [4.0] * 5, [7.0] * 5, [10.0] * 5, [13.0] * 5, [16.0] * 5]
-        )
+        y_target = np.array([[1.0] * 5, [4.0] * 5, [7.0] * 5, [10.0] * 5, [13.0] * 5, [16.0] * 5])
 
         cache_local = RegridCache(x_source, y_source, x_target, y_target)
         data_local, mask_local = cache_local.regrid(data_source)
 
-        cache_regular = RegridCache(
-            x_source, y_source, x_target, y_target, regular_grid=True
-        )
+        cache_regular = RegridCache(x_source, y_source, x_target, y_target, regular_grid=True)
         data_regular, mask_regular = cache_regular.regrid(data_source)
 
         np.testing.assert_array_almost_equal(data_local, data_regular)
@@ -1168,15 +1116,11 @@ class TestRegridCache(unittest.TestCase):
         rng = np.random.default_rng(0)
         x_source, y_source = np.meshgrid(np.array([5.0]), np.arange(10))
         data_source = rng.random(x_source.shape)
-        x_target, y_target = np.meshgrid(
-            np.array([4.0, 5.0, 6.0]), np.arange(0, 10, 2.0)
-        )
+        x_target, y_target = np.meshgrid(np.array([4.0, 5.0, 6.0]), np.arange(0, 10, 2.0))
 
         for regular_grid in [False, True]:
             with self.subTest(regular_grid=regular_grid):
-                cache = RegridCache(
-                    x_source, y_source, x_target, y_target, regular_grid=regular_grid
-                )
+                cache = RegridCache(x_source, y_source, x_target, y_target, regular_grid=regular_grid)
                 # a sane (small, finite) threshold - not the ~2e12 the
                 # unfixed regular_grid=False estimator produced here
                 self.assertTrue(np.all(np.asarray(cache.n_min_source) <= 10))
@@ -1202,9 +1146,7 @@ class TestRegridCache(unittest.TestCase):
 
         for regular_grid in [False, True]:
             with self.subTest(regular_grid=regular_grid):
-                cache = RegridCache(
-                    x_source, y_source, x_target, y_target, regular_grid=regular_grid
-                )
+                cache = RegridCache(x_source, y_source, x_target, y_target, regular_grid=regular_grid)
                 data_target, mask = cache.regrid(data_source)
                 self.assertTrue(np.all(mask))
                 self.assertFalse(np.any(np.isnan(data_target)))
@@ -1220,9 +1162,7 @@ class TestRegridCache(unittest.TestCase):
 
         for regular_grid in [False, True]:
             with self.subTest(regular_grid=regular_grid):
-                cache = RegridCache(
-                    x_source, y_source, x_target, y_target, regular_grid=regular_grid
-                )
+                cache = RegridCache(x_source, y_source, x_target, y_target, regular_grid=regular_grid)
                 data_target, mask = cache.regrid(data_source)
                 self.assertTrue(np.all(mask))
                 self.assertFalse(np.any(np.isnan(data_target)))

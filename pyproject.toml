@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "meteor_maths"
+dynamic = ["version"]
+description = "meteor_maths is a python package with mathematical algorithms for use in Earth observation data and tools"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "pyspectral",
+  "punpy>=1.0.7",
+  "pyproj",
+  "comet_maths",
+]
+authors = [{name = "MetEOR Toolkit Team", email = "team@comet-toolkit.org"}]
+license-files = ["LICENSE"]
+
+[project.urls]
+Homepage = "https://www.comet-toolkit.org/meteor/"
+Documentation = "https://meteor-toolkit.github.io/meteor_maths/"
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "mypy",
+    "pre-commit",
+    "pytest",
+    "pytest-html",
+    "pytest-cov",
+    "ipython",
+]
+
+docs = [
+    "sphinx",
+    "sphinx_rtd_theme",
+    "sphinx_book_theme",
+    "sphinx_design",
+    "sphinx_automodapi",
+    "myst_parser",
+]
+
+[tool.setuptools.packages.find]
+include = ["meteor_maths*"]
+
+[tool.setuptools_scm]
+# version inferred from git tags (e.g. v0.1.0); no extra config needed
+
+[tool.mypy]
+allow_untyped_globals = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["meteor_maths.tests.*", "meteor_maths.*.tests.*"]
+ignore_errors = true
+
+[tool.pytest.ini_options]
+testpaths = ["meteor_maths", "tests"]
+
+[tool.ruff]
+line-length = 120
+exclude = ["docs"]
+
+[tool.ruff.lint]
+extend-ignore = ["W291"]
+
+[tool.ruff.lint.per-file-ignores]
+"meteor_maths/__init__.py" = ["E402", "F401"]
+

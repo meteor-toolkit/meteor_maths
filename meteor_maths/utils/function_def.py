@@ -2,10 +2,10 @@
 Functions to define commonly used function forms
 """
 
+from collections.abc import Callable, Iterator
+
 import numpy as np
 from scipy.stats import norm
-from typing import Union, Callable, Iterator, Tuple
-
 
 __author__ = "Sam Hunt"
 __created__ = "27/10/2020"
@@ -98,13 +98,13 @@ def repeat_f(
     normalise: bool = False,
     x_sampling: float = 0.01,
     xlim_width: float = 3.0,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Evaluates repeating functions along a coordinate axis
 
     .. note::
         Defines all function on common x coordinates, so may use a lot of memory if many bands defined with x sampling.
-        For a lower memory solution try **matheo.utils.function_def.iter_fs()**..
+        For a lower memory solution try **meteor_maths.utils.function_def.iter_fs()**..
 
     :param f: function to repeat
     :param centres: function centres
@@ -141,7 +141,7 @@ def iter_f(
     Returns iterator to evaluate repeating functions along a coordinate axis
 
     .. note::
-        Offers a lower memory solution to **matheo.utils.function_def.return_fs()**.
+        Offers a lower memory solution to **meteor_maths.utils.function_def.return_fs()**.
 
     :param f: function to repeat
     :param centres: distribution centres
@@ -195,7 +195,7 @@ class RepeatingFuncUtil:
         self.x_sampling = x_sampling
         self.xlim_width = xlim_width
 
-    def return_fs(self) -> Tuple[np.ndarray, np.ndarray]:
+    def return_fs(self) -> tuple[np.ndarray, np.ndarray]:
         """
         Evaluates all repeating functions along a coordinate axis
 
@@ -212,7 +212,6 @@ class RepeatingFuncUtil:
         # Evaluate function
         ys = np.zeros((len(self.centres), len(x)))
         for i_band, (centre, width) in enumerate(zip(self.centres, self.widths)):
-
             if self.normalise:
                 ys[i_band, :] = f_normalised(self.f, x, centre, width)
             else:
@@ -226,7 +225,7 @@ class RepeatingFuncUtil:
         self.i = 0
         return self
 
-    def __next__(self) -> Tuple[np.ndarray, np.ndarray]:
+    def __next__(self) -> tuple[np.ndarray, np.ndarray]:
         """
         Returns ith function
 
@@ -236,7 +235,6 @@ class RepeatingFuncUtil:
 
         # Iterate through bands
         if self.i < len(self.centres):
-
             centre = self.centres[self.i]
             width = self.widths[self.i]
 

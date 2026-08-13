@@ -1,24 +1,24 @@
-# matheo
+# meteor_maths
 
-Matheo is a python package with mathematical algorithms for use in Earth observation data and tools.
+meteor_maths is a python package with mathematical algorithms for use in Earth observation data and tools.
 
 
 ## Installation
 
-matheo is installable via pip.
+meteor_maths is installable via pip.
 
 ## Documentation
 
-For more information visit our [documentation](https://matheo.readthedocs.io/en/latest).
+For more information visit our [documentation](https://meteor_maths.readthedocs.io/en/latest).
 
 ## License
 
-matheo is free software licensed under the
+meteor_maths is free software licensed under the
 [GNU Lesser Public License (v3)](./LICENSE).
 
 ## Acknowledgements
 
-matheo was written by Sam Hunt, Mattea Goalen, Maddie Stedman, Pieter De Vis.
+meteor_maths was written by Sam Hunt, Mattea Goalen, Maddie Stedman, Pieter De Vis.
 
 The development has been funded by:
 
@@ -27,4 +27,4 @@ The development has been funded by:
 
 ## Project status
 
-matheo is under active development. It is beta software.
+meteor_maths is under active development. It is beta software.

@@ -11,7 +11,7 @@ Getting Started
 Dependencies
 #############
 
-matheo has the following dependencies:
+meteor_maths has the following dependencies:
 
 * Python (3.7 or above)
 * `numpy <https://numpy.org>`_
@@ -23,18 +23,18 @@ matheo has the following dependencies:
 Installation
 #############
 
-The easiest way to install matheo is using pip::
+The easiest way to install meteor_maths is using pip::
 
-   $ pip install matheo
+   $ pip install meteor_maths
 
 Ideally, it is recommended to do this inside a virtual environment (e.g. conda).
 
-Alternatively, for the latest development version, first go to the folder where you want to save matheo and clone the project repository from GitHub::
+Alternatively, for the latest development version, first go to the folder where you want to save meteor_maths and clone the project repository from GitHub::
 
-   $ git clone git@github.com:meteor-toolkit/matheo.git
+   $ git clone git@github.com:meteor-toolkit/meteor_maths.git
 
 Then go into the created directory and install the module with pip::
 
-   $ cd matheo
+   $ cd meteor_maths
    $ pip install -e .
 
