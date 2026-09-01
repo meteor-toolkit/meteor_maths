@@ -4,6 +4,7 @@ Functions to band integrate spectra for given spectral response function.
 
 import multiprocessing
 from collections.abc import Callable, Iterable
+from typing import Any
 
 import numpy as np
 from punpy import MCPropagation
@@ -12,7 +13,7 @@ __author__ = "Sam Hunt"
 __created__ = "24/7/2020"
 
 
-def _max_dim(arrays: Iterable[np.ndarray]) -> int:
+def _max_dim(arrays: Iterable[float | np.ndarray | None]) -> int:
     """
     Return max dimension of input numpy arrays
 
@@ -22,13 +23,13 @@ def _max_dim(arrays: Iterable[np.ndarray]) -> int:
 
     dims = []
     for array in arrays:
-        dims.append(np.ndim(array))
+        dims.append(np.ndim(array) if array is not None else 0)
 
     return max(dims)
 
 
 def _unc_to_dim(
-    unc: float | np.ndarray, dim: int, x: np.ndarray | None = None, x_len: int | None = None
+    unc: float | np.ndarray, dim: int, x: float | np.ndarray | None = None, x_len: int | None = None
 ) -> float | np.ndarray | None:
     """
     Scales up uncertainty to given dimension (e.g. float to full vector, vector to diagonal maxtrix)
@@ -56,6 +57,7 @@ def _unc_to_dim(
             elif x is not None:
                 unc *= x
             else:
+                assert x_len is not None
                 unc = np.full(x_len, unc)
 
         if dim == 1:
@@ -69,7 +71,7 @@ def func_with_unc(
     params: dict[str, float | np.ndarray],
     u_params: dict[str, None | float | np.ndarray],
     parallel: bool = False,
-) -> tuple[float | np.ndarray, None | float | np.ndarray]:
+) -> tuple[Any, Any]:
     """
     Evaluate function and uncertainties using Monte Carlo method
 

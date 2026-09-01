@@ -185,7 +185,7 @@ class SensorSRFUtil:
         band_names: list[str] | str | None = None,
         min_wl: float | None = None,
         max_wl: float | None = None,
-    ) -> list[str] | str:
+    ) -> list[str]:
         """
         Returns band names for specified sensor bands
 

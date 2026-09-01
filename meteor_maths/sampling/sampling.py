@@ -1,6 +1,7 @@
 """Module of resampling functions"""
 
 import re
+from collections.abc import Callable
 from typing import Protocol, runtime_checkable
 
 import numpy as np
@@ -297,7 +298,7 @@ class RegridCache:
         self.x_target = x_target
         self.y_target = y_target
         self.regular_grid = regular_grid
-        self._n_min_source = None
+        self._n_min_source: int | np.ndarray | None = None
 
         self._grid_source = np.c_[x_source.ravel(), y_source.ravel()]
         grid_target = np.c_[x_target.ravel(), y_target.ravel()]
@@ -362,6 +363,7 @@ class RegridCache:
     def _ensure_n_min_source_computed(self) -> None:
         if self._n_min_source is not None:
             return
+        n_min_source: int | np.ndarray
         if self.regular_grid:
             n_min_source = _estimate_n_min_source(self._dx_source, self._dy_source, self._dx_target, self._dy_target)
         else:
@@ -407,12 +409,12 @@ class RegridCache:
         )
         with np.errstate(invalid="ignore"):
             data_target = sum_target / n_valid_target
-            std_target = None
+            std_target: np.ndarray | None = None
             if include_std:
                 std_target = (sumsq_target / n_valid_target - data_target**2.0) ** 0.5
 
         data_target = data_target.reshape(self.x_target.shape)
-        if include_std:
+        if std_target is not None:
             std_target = std_target.reshape(self.x_target.shape)
 
         if not mask_invalid:
@@ -420,7 +422,7 @@ class RegridCache:
 
         mask_valid = (n_valid_target >= self.n_min_source).reshape(self.x_target.shape)
         data_target = np.where(mask_valid, data_target, np.nan)
-        if include_std:
+        if std_target is not None:
             std_target = np.where(mask_valid, std_target, np.nan)
         return data_target, std_target, mask_valid
 
@@ -525,7 +527,7 @@ def resample(
     # name is never silently ignored just because the grids happen to match
     if resampler is None:
         try:
-            resampler_cls = _RESAMPLERS[method.lower()]
+            resampler_cls: Callable[..., Resampler] = _RESAMPLERS[method.lower()]
         except KeyError:
             raise NotImplementedError(f"Method {method} not implemented.") from None
 
@@ -541,8 +543,8 @@ def resample(
     # "x_10m", to disambiguate multiple grids in the same dataset) -- previously
     # only the prefixed form matched, forcing callers with plain "x"/"y" dims to
     # rename them just to satisfy this lookup.
-    x_dim = [dim for dim in ds[var].dims if re.search("^x(_|$)", str(dim))][0]
-    y_dim = [dim for dim in ds[var].dims if re.search("^y(_|$)", str(dim))][0]
+    x_dim = next(dim for dim in ds[var].dims if re.search("^x(_|$)", str(dim)))
+    y_dim = next(dim for dim in ds[var].dims if re.search("^y(_|$)", str(dim)))
     x_dim_idx = ds[var].dims.index(x_dim)
     y_dim_idx = ds[var].dims.index(y_dim)
     shape = list(ds[var].values.shape)
