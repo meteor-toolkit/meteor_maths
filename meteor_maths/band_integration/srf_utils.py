@@ -135,7 +135,7 @@ class SensorSRFUtil:
 
         # Unpack and validate selected bands
         self.band_names = self.return_band_names(band_names)
-        self.band_centres = self.return_band_centres()
+        self.band_centres = self.return_band_centres(band_names=self.band_names)
 
     def _band_info(self) -> tuple[list[str], np.ndarray]:
         """Return all sensor band names and centres.
@@ -159,19 +159,26 @@ class SensorSRFUtil:
         max_wl=None,
     ):
         names, centres = self._band_info()
+        centre_lookup = dict(zip(names, centres))
+        # Start from requested order, otherwise sensor order
+        if band_names is None:
+            selected_names = names
+        else:
+            selected_names = list(band_names)
 
-        mask = np.ones(len(names), dtype=bool)
+        filtered_names = []
+        filtered_centres = []
+        for name in selected_names:
+            centre = centre_lookup[name]
 
-        if band_names is not None:
-            mask &= np.isin(names, band_names)
+            if min_wl is not None and centre <= min_wl:
+                continue
+            if max_wl is not None and centre >= max_wl:
+                continue
+            filtered_names.append(name)
+            filtered_centres.append(centre)
 
-        if min_wl is not None:
-            mask &= centres > min_wl
-
-        if max_wl is not None:
-            mask &= centres < max_wl
-
-        return list(np.array(names)[mask]), centres[mask]
+        return filtered_names, np.array(filtered_centres)
 
     def return_band_names(
         self,
