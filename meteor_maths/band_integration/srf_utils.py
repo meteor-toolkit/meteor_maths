@@ -58,7 +58,7 @@ def return_band_centres(
     """
 
     srf_util = SensorSRFUtil(platform_name, sensor_name, detector_name, band_names=band_names)
-    return srf_util.return_band_centres(min_wl=min_wl, max_wl=max_wl)
+    return srf_util.return_band_centres(band_names=band_names, min_wl=min_wl, max_wl=max_wl)
 
 
 def return_srf(
