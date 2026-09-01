@@ -137,6 +137,42 @@ class SensorSRFUtil:
         self.band_names = self.return_band_names(band_names)
         self.band_centres = self.return_band_centres()
 
+    def _band_info(self) -> tuple[list[str], np.ndarray]:
+        """Return all sensor band names and centres.
+
+        :return: band names
+        :return: band centres (nm)
+        """
+        band_names = self.return_sensor_band_names()
+        band_centres = np.array(
+            [
+                self.sensor.rsr[band_name][self.detector_name]["central_wavelength"] * self.sensor.si_scale / 1e-9
+                for band_name in band_names
+            ]
+        )
+        return band_names, band_centres
+
+    def _filter_bands(
+        self,
+        band_names=None,
+        min_wl=None,
+        max_wl=None,
+    ):
+        names, centres = self._band_info()
+
+        mask = np.ones(len(names), dtype=bool)
+
+        if band_names is not None:
+            mask &= np.isin(names, band_names)
+
+        if min_wl is not None:
+            mask &= centres > min_wl
+
+        if max_wl is not None:
+            mask &= centres < max_wl
+
+        return list(np.array(names)[mask]), centres[mask]
+
     def return_band_names(
         self,
         band_names: list[str] | str | None = None,
@@ -154,21 +190,15 @@ class SensorSRFUtil:
         :return: band names
         """
 
-        sensor_band_names = self.return_sensor_band_names()
-        sensor_band_centres = self.return_band_centres()
+        names, _ = self._filter_bands(band_names=band_names, min_wl=min_wl, max_wl=max_wl)
+        return names
 
-        selected_band_centres = self.return_band_centres(min_wl=min_wl, max_wl=max_wl)
-
-        selected_band_names = [b for b, c in zip(sensor_band_names, sensor_band_centres) if c in selected_band_centres]
-
-        if band_names is None:
-            return selected_band_names
-        else:
-            if not set(band_names).issubset(set(selected_band_names)):
-                raise ValueError("band names must be one of - " + str(selected_band_names))
-            return band_names
-
-    def return_band_centres(self, min_wl: float | None = None, max_wl: float | None = None) -> np.ndarray:
+    def return_band_centres(
+        self,
+        band_names: list[str] | str | None = None,
+        min_wl: float | None = None,
+        max_wl: float | None = None,
+    ) -> np.ndarray:
         """
         Returns band centres for specified sensor bands
 
@@ -177,23 +207,8 @@ class SensorSRFUtil:
 
         :return: band centres in nm
         """
-
-        band_names = self.return_sensor_band_names()
-
-        band_centres = [
-            self.sensor.rsr[band_name][self.detector_name]["central_wavelength"] * self.sensor.si_scale / 1e-9
-            for band_name in band_names
-        ]
-
-        if min_wl is not None:
-            band_centres = [b for b in band_centres if (b > min_wl)]
-
-        if max_wl is not None:
-            band_centres = [b for b in band_centres if (b < max_wl)]
-
-        band_centres = np.array(band_centres)
-
-        return band_centres
+        _, centres = self._filter_bands(band_names=band_names, min_wl=min_wl, max_wl=max_wl)
+        return centres
 
     def return_sensor_band_names(self) -> list[str]:
         """
